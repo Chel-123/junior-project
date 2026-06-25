@@ -1,0 +1,145 @@
+// prisma/schema.prisma
+// This is your Prisma schema file for Next.js and MySQL integrations.
+// Suitable for a university Final Year Project (FYP).
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  RECEPTIONIST
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum BillStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(RECEPTIONIST)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  doctor    Doctor?  // One-to-one relationship with Doctor if role is DOCTOR
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  doctors     Doctor[]
+}
+
+model Doctor {
+  id             String            @id @default(uuid())
+  userId         String?           @unique
+  user           User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  email          String            @unique
+  phone          String
+  departmentId   String
+  department     Department        @relation(fields: [departmentId], references: [id])
+  specialization String
+  schedule       String            // e.g. "Mon, Wed, Fri 09:00 - 17:00"
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+}
+
+model Patient {
+  id             String          @id @default(uuid())
+  name           String
+  email          String          @unique
+  phone          String
+  dob            DateTime        // Date of Birth
+  gender         String          // Male / Female / Other
+  bloodGroup     String          // A+, O+, etc.
+  address        String          @db.Text
+  medicalHistory String          @db.Text // Allergic records, chronic diseases
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+  bills          Bill[]
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  patientId      String
+  patient        Patient           @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId       String
+  doctor         Doctor            @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  date           DateTime          // Appointment date
+  time           String            // e.g. "14:30"
+  reason         String            @db.Text
+  status         AppointmentStatus @default(PENDING)
+  notes          String?           @db.Text
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  medicalRecords MedicalRecord[]
+  bills          Bill[]
+}
+
+model MedicalRecord {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor       @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  symptoms      String       @db.Text
+  diagnosis     String       @db.Text
+  treatment     String       @db.Text
+  prescription  String       @db.Text
+  date          DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Bill {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  totalAmount   Decimal      @db.Decimal(10, 2)
+  paidAmount    Decimal      @db.Decimal(10, 2) @default(0.00)
+  status        BillStatus   @default(UNPAID)
+  dueDate       DateTime
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  payments      Payment[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  billId        String
+  bill          Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  amount        Decimal  @db.Decimal(10, 2)
+  paymentMethod String   // Cash / Card / Insurance / Bank Transfer
+  paymentDate   DateTime @default(now())
+  transactionId String   @unique
+  createdAt     DateTime @default(now())
+}

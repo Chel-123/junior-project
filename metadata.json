@@ -1,0 +1,6 @@
+{
+  "name": "Hospital Management System",
+  "description": "A comprehensive clinical and administrative portal for Hospital Management, featuring electronic medical records, real-time appointments, billing, and advanced reporting dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
