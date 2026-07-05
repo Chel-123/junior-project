@@ -1,0 +1,116 @@
+// Prisma schema for Hospital Management System (HMS)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now())
+  doctors   Doctor[]
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  doctors     Doctor[]
+}
+
+model Doctor {
+  id             String          @id @default(uuid())
+  userId         String?
+  user           User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name           String
+  email          String
+  phone          String
+  departmentId   String
+  department     Department      @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  specialization String
+  schedule       String
+  createdAt      DateTime        @default(now())
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+}
+
+model Patient {
+  id             String          @id @default(uuid())
+  name           String
+  email          String
+  phone          String
+  dob            String
+  gender         String
+  bloodGroup     String
+  address        String
+  medicalHistory String
+  createdAt      DateTime        @default(now())
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
+  bills          Bill[]
+}
+
+model Appointment {
+  id             String          @id @default(uuid())
+  patientId      String
+  patient        Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId       String
+  doctor         Doctor          @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  date           String
+  time           String
+  reason         String
+  status         String          @default("PENDING")
+  notes          String
+  createdAt      DateTime        @default(now())
+  medicalRecords MedicalRecord[]
+  bills          Bill[]
+}
+
+model MedicalRecord {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctorId      String
+  doctor        Doctor       @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  symptoms      String
+  diagnosis     String
+  treatment     String
+  prescription  String
+  date          String
+  createdAt     DateTime     @default(now())
+}
+
+model Bill {
+  id            String       @id @default(uuid())
+  patientId     String
+  patient       Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  totalAmount   Float
+  paidAmount    Float        @default(0.0)
+  status        String       @default("UNPAID")
+  dueDate       String
+  createdAt     DateTime     @default(now())
+  payments      Payment[]
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  billId        String
+  bill          Bill     @relation(fields: [billId], references: [id], onDelete: Cascade)
+  amount        Float
+  paymentMethod String
+  paymentDate   String
+  transactionId String
+  createdAt     DateTime @default(now())
+}
