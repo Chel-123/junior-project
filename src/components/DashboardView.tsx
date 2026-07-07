@@ -129,7 +129,7 @@ export default function DashboardView({
             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md font-mono">Received</span>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">${stats.totalRevenue.toLocaleString()}</h3>
+            <h3 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">{stats.totalRevenue.toLocaleString()} XAF</h3>
             <p className="text-sm text-slate-500 mt-1 font-medium">Hospital Income</p>
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function DashboardView({
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip cursor={{ fill: '#f8fafc' }} formatter={(val) => [`$${val}`, 'Revenue']} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} formatter={(val) => [`${val} XAF`, 'Revenue']} />
                 <Bar dataKey="revenue" fill="#10b981" radius={[4, 4, 0, 0]} barSize={36} />
               </BarChart>
             </ResponsiveContainer>

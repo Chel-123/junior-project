@@ -72,7 +72,7 @@ export default function BillingView({
     }
 
     if (amountNum > maximumAllowed) {
-      alert(`Payment exceeds maximum remaining balance of $${maximumAllowed}`);
+      alert(`Payment exceeds maximum remaining balance of ${maximumAllowed} XAF`);
       return;
     }
 
@@ -143,8 +143,8 @@ export default function BillingView({
                             <span className="font-bold text-slate-800 text-sm block">{bill.patientName}</span>
                             <span className="text-[10px] text-slate-400 font-mono block">Inv: {bill.id}</span>
                           </td>
-                          <td className="px-6 py-4 font-semibold text-slate-800">${Number(bill.totalAmount).toFixed(2)}</td>
-                          <td className="px-6 py-4 font-semibold text-slate-500">${Number(bill.paidAmount).toFixed(2)}</td>
+                          <td className="px-6 py-4 font-semibold text-slate-800">{Number(bill.totalAmount).toLocaleString()} XAF</td>
+                          <td className="px-6 py-4 font-semibold text-slate-500">{Number(bill.paidAmount).toLocaleString()} XAF</td>
                           <td className="px-6 py-4">
                             <span className={`inline-block text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded ${
                               bill.status === BillStatus.PAID ? 'bg-emerald-100 text-emerald-800' :
@@ -192,7 +192,7 @@ export default function BillingView({
                   <div key={p.id} className="p-4 flex items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-800">${p.amount.toFixed(2)}</span>
+                        <span className="font-bold text-slate-800">{p.amount.toLocaleString()} XAF</span>
                         <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold font-mono">
                           {p.paymentMethod}
                         </span>
@@ -248,7 +248,7 @@ export default function BillingView({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Fee Invoice Amount ($) *</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Total Fee Invoice Amount (XAF) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -303,14 +303,14 @@ export default function BillingView({
                 <div className="flex justify-between pt-2 border-t border-slate-200 text-slate-600 mt-2 font-mono">
                   <span>Balance Due:</span>
                   <span className="font-bold text-emerald-600">
-                    ${(recordingPaymentBill.totalAmount - recordingPaymentBill.paidAmount).toFixed(2)}
+                    {(recordingPaymentBill.totalAmount - recordingPaymentBill.paidAmount).toLocaleString()} XAF
                   </span>
                 </div>
               </div>
 
               <form onSubmit={handlePaymentSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Payment Amount ($) *</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Payment Amount (XAF) *</label>
                   <input
                     type="number"
                     step="0.01"

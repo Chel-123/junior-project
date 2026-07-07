@@ -259,15 +259,15 @@ export default function ReportsView({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200/50">
                 <span className="text-[10px] uppercase font-mono font-bold text-slate-400">Gross Invoiced Fees</span>
-                <div className="text-xl font-bold text-slate-800 mt-1">${totalBilled.toFixed(2)}</div>
+                <div className="text-xl font-bold text-slate-800 mt-1">{totalBilled.toLocaleString()} XAF</div>
               </div>
               <div className="bg-slate-50 p-4 rounded-xl border border-emerald-200/60 bg-emerald-50/20">
                 <span className="text-[10px] uppercase font-mono font-bold text-emerald-600">Net Received Revenue</span>
-                <div className="text-xl font-bold text-emerald-700 mt-1">${totalReceived.toFixed(2)}</div>
+                <div className="text-xl font-bold text-emerald-700 mt-1">{totalReceived.toLocaleString()} XAF</div>
               </div>
               <div className="bg-slate-50 p-4 rounded-xl border border-amber-200/60 bg-amber-50/20">
                 <span className="text-[10px] uppercase font-mono font-bold text-amber-600">Accounts Receivable (Pending)</span>
-                <div className="text-xl font-bold text-amber-700 mt-1">${pendingCollections.toFixed(2)}</div>
+                <div className="text-xl font-bold text-amber-700 mt-1">{pendingCollections.toLocaleString()} XAF</div>
               </div>
             </div>
 
@@ -291,9 +291,9 @@ export default function ReportsView({
                       <tr key={bill.id}>
                         <td className="px-6 py-3 font-mono">{bill.id}</td>
                         <td className="px-6 py-3 font-semibold text-slate-800">{bill.patientName}</td>
-                        <td className="px-6 py-3">${Number(bill.totalAmount).toFixed(2)}</td>
-                        <td className="px-6 py-3">${Number(bill.paidAmount).toFixed(2)}</td>
-                        <td className="px-6 py-3 font-bold font-mono text-slate-700">${balance.toFixed(2)}</td>
+                        <td className="px-6 py-3">{Number(bill.totalAmount).toLocaleString()} XAF</td>
+                        <td className="px-6 py-3">{Number(bill.paidAmount).toLocaleString()} XAF</td>
+                        <td className="px-6 py-3 font-bold font-mono text-slate-700">{balance.toLocaleString()} XAF</td>
                         <td className="px-6 py-3">
                           <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
                             bill.status === 'PAID' ? 'bg-emerald-50 text-emerald-800' :
