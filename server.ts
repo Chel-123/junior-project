@@ -532,9 +532,13 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`HMS Server successfully booted on http://localhost:${PORT}`);
-  });
+  if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`HMS Server successfully booted on http://localhost:${PORT}`);
+    });
+  }
 }
 
 startServer();
+
+export default app;
