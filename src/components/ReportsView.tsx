@@ -5,7 +5,7 @@ import {
   Printer, 
   Users, 
   Calendar, 
-  DollarSign, 
+  Banknote, 
   Download, 
   TrendingUp, 
   Building2 
@@ -96,7 +96,7 @@ export default function ReportsView({
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/60'
           }`}
         >
-          <DollarSign className="w-4 h-4" />
+          <Banknote className="w-4 h-4" />
           Financial Revenue Audits
         </button>
       </div>
@@ -250,7 +250,7 @@ export default function ReportsView({
           <div className="space-y-6">
             <div>
               <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-emerald-600" />
+                <Banknote className="w-5 h-5 text-emerald-600" />
                 Financial Revenue, Billing, and Collections Statement
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">Auditing incoming transactional assets, pending invoices, and net income.</p>

@@ -3,7 +3,7 @@ import {
   Users, 
   Stethoscope, 
   Calendar, 
-  DollarSign, 
+  Banknote, 
   ArrowUpRight, 
   Clock, 
   Sparkles,
@@ -124,7 +124,7 @@ export default function DashboardView({
         <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
             <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
-              <DollarSign className="w-6 h-6" />
+              <Banknote className="w-6 h-6" />
             </div>
             <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md font-mono">Received</span>
           </div>

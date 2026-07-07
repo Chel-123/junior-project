@@ -4,7 +4,7 @@ import {
   Plus, 
   Search, 
   X, 
-  DollarSign, 
+  Banknote, 
   CreditCard, 
   Check, 
   ChevronRight,
