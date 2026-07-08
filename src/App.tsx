@@ -365,91 +365,177 @@ export default function App() {
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow-sm border border-slate-200/80 rounded-2xl sm:px-10">
-            <div className="mb-6 text-center">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center justify-center gap-2">
-                <Lock className="w-5 h-5 text-emerald-600" />
-                Login
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Enter your personal clinical information to unlock your portal session
-              </p>
-            </div>
-
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={registerName}
-                  onChange={(e) => setRegisterName(e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                  placeholder="e.g. Clara Barton"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Clinical Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                  placeholder="e.g. clara@hospital.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Choose Clinical Role
-                </label>
-                <select
-                  value={registerRole}
-                  onChange={(e) => setRegisterRole(e.target.value as UserRole)}
-                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50 font-medium cursor-pointer"
-                >
-                  <option value={UserRole.ADMIN}>Administrator (Full Access)</option>
-                  <option value={UserRole.DOCTOR}>Medical Doctor (EMR Clinical Cards)</option>
-                  <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
-                  <option value={UserRole.RECEPTIONIST}>Receptionist (Billing/Booking)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Portal Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              {authError && (
-                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
-                  {authError}
+            {!isRegistering ? (
+              <>
+                <div className="mb-6 text-center">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center justify-center gap-2">
+                    <Lock className="w-5 h-5 text-emerald-600" />
+                    Login
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Enter your personal clinical credentials to unlock your portal session
+                  </p>
                 </div>
-              )}
 
-              <button
-                type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
-              >
-                <Unlock className="w-4 h-4" />
-                Login & Access Portal
-              </button>
-            </form>
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Clinical Email Address
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. admin@hospital.com"
+                    />
+                  </div>
 
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Portal Password
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                      placeholder="••••••••"
+                    />
+                  </div>
 
+                  {authError && (
+                    <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
+                      {authError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
+                  >
+                    <Unlock className="w-4 h-4" />
+                    Login & Access Portal
+                  </button>
+                </form>
+
+                <div className="mt-6 text-center text-xs text-slate-500">
+                  New to the portal?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRegistering(true);
+                      setAuthError('');
+                    }}
+                    className="text-emerald-600 hover:underline font-semibold cursor-pointer"
+                  >
+                    Register here
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-6 text-center">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center justify-center gap-2">
+                    <Unlock className="w-5 h-5 text-emerald-600" />
+                    Register Account
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Create a new clinical portal account to get started
+                  </p>
+                </div>
+
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={registerName}
+                      onChange={(e) => setRegisterName(e.target.value)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. Clara Barton"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Clinical Email Address
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={registerEmail}
+                      onChange={(e) => setRegisterEmail(e.target.value)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                      placeholder="e.g. clara@hospital.com"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Choose Clinical Role
+                    </label>
+                    <select
+                      value={registerRole}
+                      onChange={(e) => setRegisterRole(e.target.value as UserRole)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50 font-medium cursor-pointer"
+                    >
+                      <option value={UserRole.ADMIN}>Administrator (Full Access)</option>
+                      <option value={UserRole.DOCTOR}>Medical Doctor (EMR Clinical Cards)</option>
+                      <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
+                      <option value={UserRole.RECEPTIONIST}>Receptionist (Billing/Booking)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                      Portal Password
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                      placeholder="••••••••"
+                    />
+                  </div>
+
+                  {authError && (
+                    <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
+                      {authError}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
+                  >
+                    <Unlock className="w-4 h-4" />
+                    Register & Access Portal
+                  </button>
+                </form>
+
+                <div className="mt-6 text-center text-xs text-slate-500">
+                  Already registered?{' '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRegistering(false);
+                      setAuthError('');
+                    }}
+                    className="text-emerald-600 hover:underline font-semibold cursor-pointer"
+                  >
+                    Login here
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

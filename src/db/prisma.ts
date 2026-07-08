@@ -32,7 +32,8 @@ export async function ensureSeeded() {
         id: 'usr-1',
         email: 'admin@hospital.com',
         name: 'System Administrator',
-        role: 'ADMIN'
+        role: 'ADMIN',
+        password: 'admin123'
       }
     });
 
@@ -41,7 +42,8 @@ export async function ensureSeeded() {
         id: 'usr-2',
         email: 'doctor@hospital.com',
         name: 'Dr. Gregory House',
-        role: 'DOCTOR'
+        role: 'DOCTOR',
+        password: 'doctor123'
       }
     });
 
@@ -50,7 +52,8 @@ export async function ensureSeeded() {
         id: 'usr-3',
         email: 'receptionist@hospital.com',
         name: 'Jane Smith',
-        role: 'RECEPTIONIST'
+        role: 'RECEPTIONIST',
+        password: 'receptionist123'
       }
     });
 
@@ -59,7 +62,8 @@ export async function ensureSeeded() {
         id: 'usr-4',
         email: 'nurse@hospital.com',
         name: 'Nurse Clara Barton',
-        role: 'NURSE'
+        role: 'NURSE',
+        password: 'nurse123'
       }
     });
 
