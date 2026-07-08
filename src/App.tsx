@@ -428,66 +428,7 @@ export default function App() {
               </button>
             </form>
 
-            {/* Access Roles */}
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                Access Roles
-              </div>
-              <div className="grid grid-cols-1 gap-2">
-                <button
-                  onClick={() => {
-                    setRegisterName('System Administrator');
-                    setRegisterEmail('admin@hospital.com');
-                    setRegisterRole(UserRole.ADMIN);
-                    setRegisterPassword('admin123');
-                    setAuthError('');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>ADMIN (Full Access)</span>
-                  <span className="font-mono text-[10px] text-slate-400">admin@hospital.com</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setRegisterName('Dr. Gregory House');
-                    setRegisterEmail('doctor@hospital.com');
-                    setRegisterRole(UserRole.DOCTOR);
-                    setRegisterPassword('admin123');
-                    setAuthError('');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>DOCTOR (EMR Clinical Cards)</span>
-                  <span className="font-mono text-[10px] text-slate-400">doctor@hospital.com</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setRegisterName('Jane Smith');
-                    setRegisterEmail('receptionist@hospital.com');
-                    setRegisterRole(UserRole.RECEPTIONIST);
-                    setRegisterPassword('admin123');
-                    setAuthError('');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>RECEPTIONIST (Billing/Booking)</span>
-                  <span className="font-mono text-[10px] text-slate-400">receptionist@hospital.com</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setRegisterName('Nurse Clara Barton');
-                    setRegisterEmail('nurse@hospital.com');
-                    setRegisterRole(UserRole.NURSE);
-                    setRegisterPassword('admin123');
-                    setAuthError('');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>NURSE (Patient Care & EMR)</span>
-                  <span className="font-mono text-[10px] text-slate-400">nurse@hospital.com</span>
-                </button>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
