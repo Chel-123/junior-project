@@ -57,6 +57,28 @@ export default function App() {
     }
   }, [currentUser, location.pathname, navigate]);
 
+  // Tab permission configuration mapping
+  const tabRoles: Record<string, UserRole[]> = {
+    dashboard: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE],
+    patients: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE],
+    doctors: [UserRole.ADMIN],
+    appointments: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE],
+    'medical-records': [UserRole.ADMIN, UserRole.DOCTOR],
+    billing: [UserRole.ADMIN, UserRole.RECEPTIONIST],
+    departments: [UserRole.ADMIN],
+    reports: [UserRole.ADMIN]
+  };
+
+  // Guard route navigation based on user role permissions
+  useEffect(() => {
+    if (currentUser) {
+      const allowedRoles = tabRoles[currentTab];
+      if (allowedRoles && !allowedRoles.includes(userRole)) {
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [currentTab, userRole, currentUser, navigate]);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Core Database States
@@ -651,6 +673,7 @@ export default function App() {
               doctors={doctors}
               onAddRecord={handleAddMedicalRecord}
               userRole={userRole}
+              currentUser={currentUser}
             />
           )}
 

@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FileText, 
   Plus, 
   Search, 
   X, 
-  User, 
+  User as UserIcon, 
   Stethoscope, 
   Activity, 
   Heart,
   Calendar,
   ClipboardList
 } from 'lucide-react';
-import { MedicalRecord, Patient, Doctor } from '../types';
+import { MedicalRecord, Patient, Doctor, User } from '../types';
 
 interface MedicalRecordsViewProps {
   records: MedicalRecord[];
@@ -19,6 +19,7 @@ interface MedicalRecordsViewProps {
   doctors: Doctor[];
   onAddRecord: (r: Omit<MedicalRecord, 'id' | 'createdAt'>) => void;
   userRole: string;
+  currentUser: User | null;
 }
 
 export default function MedicalRecordsView({
@@ -26,7 +27,8 @@ export default function MedicalRecordsView({
   patients,
   doctors,
   onAddRecord,
-  userRole
+  userRole,
+  currentUser
 }: MedicalRecordsViewProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<MedicalRecord | null>(null);
@@ -39,6 +41,22 @@ export default function MedicalRecordsView({
   const [treatment, setTreatment] = useState('');
   const [prescription, setPrescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Find the logged-in doctor record matching our user account
+  const currentDoctor = userRole === 'DOCTOR'
+    ? doctors.find(d => d.userId === currentUser?.id || d.email === currentUser?.email)
+    : null;
+
+  // Auto-fill doctor id if the logged-in user is a doctor
+  useEffect(() => {
+    if (isAdding) {
+      if (currentDoctor) {
+        setDoctorId(currentDoctor.id);
+      } else {
+        setDoctorId('');
+      }
+    }
+  }, [isAdding, currentDoctor]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,8 +85,8 @@ export default function MedicalRecordsView({
     setPrescription('');
   };
 
-  // Restrict to DOCTOR and ADMIN
-  const canAddRecord = userRole === 'DOCTOR' || userRole === 'ADMIN';
+  // Restrict only to DOCTOR
+  const canAddRecord = userRole === 'DOCTOR';
 
   return (
     <div className="space-y-6">
@@ -174,20 +192,28 @@ export default function MedicalRecordsView({
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Diagnosing Doctor *</label>
-                  <select
-                    required
-                    value={doctorId}
-                    onChange={(e) => setDoctorId(e.target.value)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                  >
-                    <option value="">-- Choose Physician --</option>
-                    {doctors.map(d => (
-                      <option key={d.id} value={d.id}>{d.name} - {d.specialization}</option>
-                    ))}
-                  </select>
-                </div>
+                {!currentDoctor ? (
+                  <div>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Diagnosing Doctor *</label>
+                    <select
+                      required
+                      value={doctorId}
+                      onChange={(e) => setDoctorId(e.target.value)}
+                      className="w-full text-sm border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                    >
+                      <option value="">-- Choose Physician --</option>
+                      {doctors.map(d => (
+                        <option key={d.id} value={d.id}>{d.name} - {d.specialization}</option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">Diagnosing Doctor</span>
+                    <span className="text-sm font-bold text-slate-700">{currentDoctor.name}</span>
+                    <span className="text-xs text-slate-500 block">{currentDoctor.specialization}</span>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Entry Date</label>

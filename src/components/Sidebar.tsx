@@ -32,9 +32,9 @@ export default function Sidebar({
   const menuItems = [
     { id: 'dashboard', name: 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
     { id: 'patients', name: 'Patient Directory', icon: Users, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE] },
-    { id: 'doctors', name: 'Doctor Registries', icon: Stethoscope, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
+    { id: 'doctors', name: 'Doctor Registries', icon: Stethoscope, roles: [UserRole.ADMIN] },
     { id: 'appointments', name: 'Appointments Manager', icon: Calendar, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
-    { id: 'medical-records', name: 'Electronic Medical Records', icon: FileText, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE] },
+    { id: 'medical-records', name: 'Electronic Medical Records', icon: FileText, roles: [UserRole.ADMIN, UserRole.DOCTOR] },
     { id: 'billing', name: 'Invoices & Payments', icon: Receipt, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST] },
     { id: 'departments', name: 'Hospital Departments', icon: Building2, roles: [UserRole.ADMIN] },
     { id: 'reports', name: 'Reports & Analytics', icon: BarChart3, roles: [UserRole.ADMIN] }
