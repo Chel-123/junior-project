@@ -10,7 +10,51 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// 1. Auth Endpoint
+// 1. Auth Endpoints
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: 'All fields (name, email, password, role) are required.' });
+    }
+
+    const existing = await prisma.user.findFirst({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ message: 'Email address is already registered.' });
+    }
+
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password,
+        role: role.toUpperCase()
+      }
+    });
+
+    // If role is DOCTOR, automatically create a corresponding Doctor registry record!
+    if (role.toUpperCase() === 'DOCTOR') {
+      const firstDept = await prisma.department.findFirst();
+      await prisma.doctor.create({
+        data: {
+          userId: newUser.id,
+          name: newUser.name,
+          email: newUser.email,
+          phone: '+1 (555) 000-0000',
+          departmentId: firstDept ? firstDept.id : 'dept-3',
+          specialization: 'General Medicine',
+          schedule: 'Mon - Fri 09:00 - 17:00'
+        }
+      });
+    }
+
+    return res.status(201).json({ user: newUser, token: `mock-jwt-${newUser.role.toLowerCase()}-token` });
+  } catch (error: any) {
+    console.error('Error in /api/auth/register:', error);
+    res.status(500).json({ message: 'Error registering user' });
+  }
+});
+
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -18,20 +62,16 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    // Check for demo credentials or DB users
-    if (password === 'admin123') {
-      const user = await prisma.user.findFirst({ where: { email } });
-      if (user) {
-        return res.json({ user, token: `mock-jwt-${user.role.toLowerCase()}-token` });
-      }
+    const user = await prisma.user.findFirst({ where: { email } });
+    if (!user) {
+      return res.status(401).json({ message: 'User not found.' });
     }
 
-    const matchedUser = await prisma.user.findFirst({ where: { email } });
-    if (matchedUser) {
-      return res.json({ user: matchedUser, token: 'mock-jwt-token' });
+    if (user.password === password || password === 'admin123') {
+      return res.json({ user, token: `mock-jwt-${user.role.toLowerCase()}-token` });
     }
 
-    return res.status(401).json({ message: 'Invalid credentials. Try admin@hospital.com with admin123' });
+    return res.status(401).json({ message: 'Invalid credentials. Please verify your email and password.' });
   } catch (error: any) {
     console.error('Error in /api/auth/login:', error);
     res.status(500).json({ message: 'Internal server error' });

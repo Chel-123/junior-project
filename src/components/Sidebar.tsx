@@ -30,11 +30,11 @@ export default function Sidebar({
   
   // List of all navigation items with roles allowed
   const menuItems = [
-    { id: 'dashboard', name: 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST] },
-    { id: 'patients', name: 'Patient Directory', icon: Users, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST] },
-    { id: 'doctors', name: 'Doctor Registries', icon: Stethoscope, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST] },
-    { id: 'appointments', name: 'Appointments Manager', icon: Calendar, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST] },
-    { id: 'medical-records', name: 'Electronic Medical Records', icon: FileText, roles: [UserRole.ADMIN, UserRole.DOCTOR] },
+    { id: 'dashboard', name: 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
+    { id: 'patients', name: 'Patient Directory', icon: Users, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE] },
+    { id: 'doctors', name: 'Doctor Registries', icon: Stethoscope, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
+    { id: 'appointments', name: 'Appointments Manager', icon: Calendar, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
+    { id: 'medical-records', name: 'Electronic Medical Records', icon: FileText, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.NURSE] },
     { id: 'billing', name: 'Invoices & Payments', icon: Receipt, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST] },
     { id: 'departments', name: 'Hospital Departments', icon: Building2, roles: [UserRole.ADMIN] },
     { id: 'reports', name: 'Reports & Analytics', icon: BarChart3, roles: [UserRole.ADMIN] }
@@ -76,6 +76,7 @@ export default function Sidebar({
           <option value={UserRole.ADMIN}>Administrator (Full System)</option>
           <option value={UserRole.DOCTOR}>Medical Doctor (EMR & Diagnoses)</option>
           <option value={UserRole.RECEPTIONIST}>Receptionist (Bills & Booking)</option>
+          <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
         </select>
         <div className="mt-2 text-[10px] text-slate-400 flex items-start gap-1">
           <ShieldAlert className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />

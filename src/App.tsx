@@ -26,18 +26,14 @@ import {
   Heart, 
   Unlock, 
   LogOut, 
-  UserCircle 
+  UserCircle,
+  UserPlus,
+  Lock
 } from 'lucide-react';
 
 export default function App() {
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
-  const [currentUser, setCurrentUser] = useState<User | null>({
-    id: 'usr-1',
-    email: 'admin@hospital.com',
-    name: 'System Administrator',
-    role: UserRole.ADMIN,
-    createdAt: new Date().toISOString()
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -68,6 +64,13 @@ export default function App() {
   const [loginEmail, setLoginEmail] = useState('admin@hospital.com');
   const [loginPassword, setLoginPassword] = useState('admin123');
   const [authError, setAuthError] = useState('');
+
+  // registration states
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [registerRole, setRegisterRole] = useState<UserRole>(UserRole.DOCTOR);
 
   // 1. Fetch entire database from API backend
   const refreshData = async () => {
@@ -129,11 +132,14 @@ export default function App() {
       const dbUsers = [
         { id: 'usr-1', email: 'admin@hospital.com', name: 'System Administrator', role: UserRole.ADMIN, createdAt: new Date().toISOString() },
         { id: 'usr-2', email: 'doctor@hospital.com', name: 'Dr. Gregory House', role: UserRole.DOCTOR, createdAt: new Date().toISOString() },
-        { id: 'usr-3', email: 'receptionist@hospital.com', name: 'Jane Smith', role: UserRole.RECEPTIONIST, createdAt: new Date().toISOString() }
+        { id: 'usr-3', email: 'receptionist@hospital.com', name: 'Jane Smith', role: UserRole.RECEPTIONIST, createdAt: new Date().toISOString() },
+        { id: 'usr-4', email: 'nurse@hospital.com', name: 'Nurse Clara Barton', role: UserRole.NURSE, createdAt: new Date().toISOString() }
       ];
-      const match = dbUsers.find(u => u.role === userRole);
-      if (match) {
-        setCurrentUser(match);
+      if (currentUser.role !== userRole) {
+        const match = dbUsers.find(u => u.role === userRole);
+        if (match) {
+          setCurrentUser(match);
+        }
       }
     }
   }, [userRole]);
@@ -159,6 +165,37 @@ export default function App() {
       setUserRole(data.user.role);
     } catch (err) {
       setAuthError('Connection failed. Server might be booting.');
+    }
+  };
+
+  // 2.5. Authentication Registration Submit
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setAuthError('');
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: registerName,
+          email: registerEmail,
+          password: registerPassword,
+          role: registerRole
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        setAuthError(errData.message || 'Error registering account.');
+        return;
+      }
+
+      const data = await response.json();
+      setCurrentUser(data.user);
+      setUserRole(data.user.role);
+    } catch (err) {
+      console.error('Error registering:', err);
+      setAuthError('Connection failed.');
     }
   };
 
@@ -307,87 +344,206 @@ export default function App() {
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow-sm border border-slate-200/80 rounded-2xl sm:px-10">
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Clinical Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                  placeholder="e.g. admin@hospital.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                  Portal Password
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              {authError && (
-                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
-                  {authError}
-                </div>
-              )}
-
+            {/* Tabs Header */}
+            <div className="flex border-b border-slate-100 pb-4 mb-6">
               <button
-                type="submit"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
+                onClick={() => {
+                  setIsRegistering(false);
+                  setAuthError('');
+                }}
+                className={`flex-1 pb-2.5 text-sm font-semibold text-center border-b-2 transition-all cursor-pointer ${
+                  !isRegistering
+                    ? 'border-emerald-500 text-emerald-600'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
               >
-                <Unlock className="w-4 h-4" />
-                Unlock Portal Session
+                Login Portal
               </button>
-            </form>
-
-            <div className="mt-6 border-t border-slate-100 pt-6">
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                Quick Evaluator Access Roles
-              </div>
-              <div className="grid grid-cols-1 gap-2">
-                <button
-                  onClick={() => {
-                    setLoginEmail('admin@hospital.com');
-                    setLoginPassword('admin123');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>ADMIN (Full Access)</span>
-                  <span className="font-mono text-[10px] text-slate-400">admin@hospital.com</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setLoginEmail('doctor@hospital.com');
-                    setLoginPassword('admin123');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>DOCTOR (EMR Clinical Cards)</span>
-                  <span className="font-mono text-[10px] text-slate-400">doctor@hospital.com</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setLoginEmail('receptionist@hospital.com');
-                    setLoginPassword('admin123');
-                  }}
-                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                >
-                  <span>RECEPTIONIST (Billing/Booking)</span>
-                  <span className="font-mono text-[10px] text-slate-400">receptionist@hospital.com</span>
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setIsRegistering(true);
+                  setAuthError('');
+                }}
+                className={`flex-1 pb-2.5 text-sm font-semibold text-center border-b-2 transition-all cursor-pointer ${
+                  isRegistering
+                    ? 'border-emerald-500 text-emerald-600'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                Register Account
+              </button>
             </div>
+
+            {!isRegistering ? (
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Clinical Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                    placeholder="e.g. admin@hospital.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Portal Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                {authError && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
+                    {authError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
+                >
+                  <Unlock className="w-4 h-4" />
+                  Unlock Portal Session
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                    placeholder="e.g. Clara Barton"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Clinical Email Address
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                    placeholder="e.g. clara@hospital.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Choose Clinical Role
+                  </label>
+                  <select
+                    value={registerRole}
+                    onChange={(e) => setRegisterRole(e.target.value as UserRole)}
+                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50 font-medium cursor-pointer"
+                  >
+                    <option value={UserRole.ADMIN}>Administrator (Full Access)</option>
+                    <option value={UserRole.DOCTOR}>Medical Doctor (EMR Clinical Cards)</option>
+                    <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
+                    <option value={UserRole.RECEPTIONIST}>Receptionist (Billing/Booking)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                    Choose Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                {authError && (
+                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
+                    {authError}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Create Clinical Account
+                </button>
+              </form>
+            )}
+
+            {/* Quick Access Roles */}
+            {!isRegistering && (
+              <div className="mt-6 border-t border-slate-100 pt-6">
+                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                  Quick Evaluator Access Roles
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    onClick={() => {
+                      setLoginEmail('admin@hospital.com');
+                      setLoginPassword('admin123');
+                    }}
+                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                  >
+                    <span>ADMIN (Full Access)</span>
+                    <span className="font-mono text-[10px] text-slate-400">admin@hospital.com</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLoginEmail('doctor@hospital.com');
+                      setLoginPassword('admin123');
+                    }}
+                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                  >
+                    <span>DOCTOR (EMR Clinical Cards)</span>
+                    <span className="font-mono text-[10px] text-slate-400">doctor@hospital.com</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLoginEmail('receptionist@hospital.com');
+                      setLoginPassword('admin123');
+                    }}
+                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                  >
+                    <span>RECEPTIONIST (Billing/Booking)</span>
+                    <span className="font-mono text-[10px] text-slate-400">receptionist@hospital.com</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setLoginEmail('nurse@hospital.com');
+                      setLoginPassword('admin123');
+                    }}
+                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                  >
+                    <span>NURSE (Patient Care & EMR)</span>
+                    <span className="font-mono text-[10px] text-slate-400">nurse@hospital.com</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

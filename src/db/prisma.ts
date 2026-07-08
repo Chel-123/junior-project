@@ -54,6 +54,15 @@ export async function ensureSeeded() {
       }
     });
 
+    await db.user.create({
+      data: {
+        id: 'usr-4',
+        email: 'nurse@hospital.com',
+        name: 'Nurse Clara Barton',
+        role: 'NURSE'
+      }
+    });
+
     // 2. Seed Departments
     const dept1 = await db.department.create({
       data: {
