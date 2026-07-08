@@ -338,7 +338,7 @@ export default function App() {
             Saint Mary Clinical Portal
           </h2>
           <p className="mt-2 text-center text-sm text-slate-500">
-            Hospital Management System • University Final Year Project
+            Hospital Management System
           </p>
         </div>
 
