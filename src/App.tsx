@@ -344,206 +344,150 @@ export default function App() {
 
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-8 px-4 shadow-sm border border-slate-200/80 rounded-2xl sm:px-10">
-            {/* Tabs Header */}
-            <div className="flex border-b border-slate-100 pb-4 mb-6">
-              <button
-                onClick={() => {
-                  setIsRegistering(false);
-                  setAuthError('');
-                }}
-                className={`flex-1 pb-2.5 text-sm font-semibold text-center border-b-2 transition-all cursor-pointer ${
-                  !isRegistering
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                Login Portal
-              </button>
-              <button
-                onClick={() => {
-                  setIsRegistering(true);
-                  setAuthError('');
-                }}
-                className={`flex-1 pb-2.5 text-sm font-semibold text-center border-b-2 transition-all cursor-pointer ${
-                  isRegistering
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                Register Account
-              </button>
+            <div className="mb-6 text-center">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center justify-center gap-2">
+                <Lock className="w-5 h-5 text-emerald-600" />
+                Login
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Enter your personal clinical information to unlock your portal session
+              </p>
             </div>
 
-            {!isRegistering ? (
-              <form onSubmit={handleLogin} className="space-y-6">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                    Clinical Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                    placeholder="e.g. admin@hospital.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                    Portal Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                {authError && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
-                    {authError}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
-                >
-                  <Unlock className="w-4 h-4" />
-                  Unlock Portal Session
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={registerName}
-                    onChange={(e) => setRegisterName(e.target.value)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                    placeholder="e.g. Clara Barton"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                    Clinical Email Address
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={registerEmail}
-                    onChange={(e) => setRegisterEmail(e.target.value)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                    placeholder="e.g. clara@hospital.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                    Choose Clinical Role
-                  </label>
-                  <select
-                    value={registerRole}
-                    onChange={(e) => setRegisterRole(e.target.value as UserRole)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50 font-medium cursor-pointer"
-                  >
-                    <option value={UserRole.ADMIN}>Administrator (Full Access)</option>
-                    <option value={UserRole.DOCTOR}>Medical Doctor (EMR Clinical Cards)</option>
-                    <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
-                    <option value={UserRole.RECEPTIONIST}>Receptionist (Billing/Booking)</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-                    Choose Password
-                  </label>
-                  <input
-                    type="password"
-                    required
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
-                    placeholder="••••••••"
-                  />
-                </div>
-
-                {authError && (
-                  <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
-                    {authError}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Create Clinical Account
-                </button>
-              </form>
-            )}
-
-            {/* Quick Access Roles */}
-            {!isRegistering && (
-              <div className="mt-6 border-t border-slate-100 pt-6">
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-                  Quick Evaluator Access Roles
-                </div>
-                <div className="grid grid-cols-1 gap-2">
-                  <button
-                    onClick={() => {
-                      setLoginEmail('admin@hospital.com');
-                      setLoginPassword('admin123');
-                    }}
-                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                  >
-                    <span>ADMIN (Full Access)</span>
-                    <span className="font-mono text-[10px] text-slate-400">admin@hospital.com</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setLoginEmail('doctor@hospital.com');
-                      setLoginPassword('admin123');
-                    }}
-                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                  >
-                    <span>DOCTOR (EMR Clinical Cards)</span>
-                    <span className="font-mono text-[10px] text-slate-400">doctor@hospital.com</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setLoginEmail('receptionist@hospital.com');
-                      setLoginPassword('admin123');
-                    }}
-                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                  >
-                    <span>RECEPTIONIST (Billing/Booking)</span>
-                    <span className="font-mono text-[10px] text-slate-400">receptionist@hospital.com</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setLoginEmail('nurse@hospital.com');
-                      setLoginPassword('admin123');
-                    }}
-                    className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
-                  >
-                    <span>NURSE (Patient Care & EMR)</span>
-                    <span className="font-mono text-[10px] text-slate-400">nurse@hospital.com</span>
-                  </button>
-                </div>
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={registerName}
+                  onChange={(e) => setRegisterName(e.target.value)}
+                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                  placeholder="e.g. Clara Barton"
+                />
               </div>
-            )}
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  Clinical Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                  placeholder="e.g. clara@hospital.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  Choose Clinical Role
+                </label>
+                <select
+                  value={registerRole}
+                  onChange={(e) => setRegisterRole(e.target.value as UserRole)}
+                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50 font-medium cursor-pointer"
+                >
+                  <option value={UserRole.ADMIN}>Administrator (Full Access)</option>
+                  <option value={UserRole.DOCTOR}>Medical Doctor (EMR Clinical Cards)</option>
+                  <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
+                  <option value={UserRole.RECEPTIONIST}>Receptionist (Billing/Booking)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
+                  Portal Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  className="w-full text-sm border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {authError && (
+                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-600 font-medium">
+                  {authError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-500/10"
+              >
+                <Unlock className="w-4 h-4" />
+                Login & Access Portal
+              </button>
+            </form>
+
+            {/* Access Roles */}
+            <div className="mt-6 border-t border-slate-100 pt-6">
+              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+                Access Roles
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <button
+                  onClick={() => {
+                    setRegisterName('System Administrator');
+                    setRegisterEmail('admin@hospital.com');
+                    setRegisterRole(UserRole.ADMIN);
+                    setRegisterPassword('admin123');
+                    setAuthError('');
+                  }}
+                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                >
+                  <span>ADMIN (Full Access)</span>
+                  <span className="font-mono text-[10px] text-slate-400">admin@hospital.com</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setRegisterName('Dr. Gregory House');
+                    setRegisterEmail('doctor@hospital.com');
+                    setRegisterRole(UserRole.DOCTOR);
+                    setRegisterPassword('admin123');
+                    setAuthError('');
+                  }}
+                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                >
+                  <span>DOCTOR (EMR Clinical Cards)</span>
+                  <span className="font-mono text-[10px] text-slate-400">doctor@hospital.com</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setRegisterName('Jane Smith');
+                    setRegisterEmail('receptionist@hospital.com');
+                    setRegisterRole(UserRole.RECEPTIONIST);
+                    setRegisterPassword('admin123');
+                    setAuthError('');
+                  }}
+                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                >
+                  <span>RECEPTIONIST (Billing/Booking)</span>
+                  <span className="font-mono text-[10px] text-slate-400">receptionist@hospital.com</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setRegisterName('Nurse Clara Barton');
+                    setRegisterEmail('nurse@hospital.com');
+                    setRegisterRole(UserRole.NURSE);
+                    setRegisterPassword('admin123');
+                    setAuthError('');
+                  }}
+                  className="w-full text-left p-2.5 rounded-lg border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/10 text-xs text-slate-600 font-semibold cursor-pointer flex justify-between items-center"
+                >
+                  <span>NURSE (Patient Care & EMR)</span>
+                  <span className="font-mono text-[10px] text-slate-400">nurse@hospital.com</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
