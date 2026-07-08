@@ -54,7 +54,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(201).json({ user: newUser, token: `mock-jwt-${newUser.role.toLowerCase()}-token` });
   } catch (error: any) {
     console.error('Error in /api/auth/register:', error);
-    res.status(500).json({ message: 'Error registering user' });
+    res.status(500).json({ message: `Error registering user: ${error.message || error}` });
   }
 });
 

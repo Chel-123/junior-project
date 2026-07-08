@@ -163,8 +163,8 @@ export default function App() {
       const data = await response.json();
       setCurrentUser(data.user);
       setUserRole(data.user.role);
-    } catch (err) {
-      setAuthError('Connection failed. Server might be booting.');
+    } catch (err: any) {
+      setAuthError(`Connection failed: ${err.message || err}`);
     }
   };
 
@@ -193,9 +193,9 @@ export default function App() {
       const data = await response.json();
       setCurrentUser(data.user);
       setUserRole(data.user.role);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error registering:', err);
-      setAuthError('Connection failed.');
+      setAuthError(`Connection failed: ${err.message || err}`);
     }
   };
 
