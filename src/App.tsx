@@ -35,8 +35,32 @@ export default function App() {
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const [currentTab, setCurrentTab] = useState<string>('dashboard');
+  const [currentTab, setCurrentTab] = useState<string>(() => {
+    const hash = window.location.hash.replace('#', '');
+    const allowedTabs = ['dashboard', 'patients', 'doctors', 'appointments', 'medical-records', 'billing', 'departments', 'reports'];
+    return allowedTabs.includes(hash) ? hash : 'dashboard';
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Sync state to URL hash
+  useEffect(() => {
+    if (currentTab) {
+      window.location.hash = currentTab;
+    }
+  }, [currentTab]);
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      const allowedTabs = ['dashboard', 'patients', 'doctors', 'appointments', 'medical-records', 'billing', 'departments', 'reports'];
+      if (hash && allowedTabs.includes(hash)) {
+        setCurrentTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   // Core Database States
   const [patients, setPatients] = useState<Patient[]>([]);
