@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   UserRole, 
   User, 
@@ -35,32 +36,28 @@ export default function App() {
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  const [currentTab, setCurrentTab] = useState<string>(() => {
-    const hash = window.location.hash.replace('#', '');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Parse path to set tab state cleanly, supporting proper URL routing
+  const currentTab = (() => {
+    const tab = location.pathname.replace(/^\//, '');
     const allowedTabs = ['dashboard', 'patients', 'doctors', 'appointments', 'medical-records', 'billing', 'departments', 'reports'];
-    return allowedTabs.includes(hash) ? hash : 'dashboard';
-  });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+    return allowedTabs.includes(tab) ? tab : 'dashboard';
+  })();
 
-  // Sync state to URL hash
+  const setCurrentTab = (tab: string) => {
+    navigate(`/${tab}`);
+  };
+
+  // Redirect root '/' or empty path to '/dashboard' if logged in
   useEffect(() => {
-    if (currentTab) {
-      window.location.hash = currentTab;
+    if (currentUser && (location.pathname === '/' || location.pathname === '')) {
+      navigate('/dashboard', { replace: true });
     }
-  }, [currentTab]);
+  }, [currentUser, location.pathname, navigate]);
 
-  // Handle browser back/forward navigation
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      const allowedTabs = ['dashboard', 'patients', 'doctors', 'appointments', 'medical-records', 'billing', 'departments', 'reports'];
-      if (hash && allowedTabs.includes(hash)) {
-        setCurrentTab(hash);
-      }
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Core Database States
   const [patients, setPatients] = useState<Patient[]>([]);
