@@ -239,7 +239,7 @@ export default function DoctorsView({
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. +1 (555) 234-5678"
+                    placeholder="e.g. +237 699-234-567"
                     className="w-full text-sm border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
                   />
                 </div>

@@ -36,7 +36,7 @@ router.post('/register', async (req, res) => {
           userId: newUser.id,
           name: newUser.name,
           email: newUser.email,
-          phone: '+1 (555) 000-0000',
+          phone: '+237 600-000-000',
           departmentId: firstDept ? firstDept.id : 'dept-3',
           specialization: 'General Medicine',
           schedule: 'Mon - Fri 09:00 - 17:00'

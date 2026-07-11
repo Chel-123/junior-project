@@ -109,9 +109,9 @@ export default function ReportsView({
           <div className="space-y-1">
             <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               <span className="text-emerald-600 font-bold text-2xl leading-none">+</span>
-              SAINT MARY HOSPITAL
+              EDEN PHOENIX HOSPITAL
             </h1>
-            <p className="text-xs text-slate-400">Main Western Wing Road • Tel: +1 (555) 000-1111</p>
+            <p className="text-xs text-slate-400">Main Western Wing Road • Tel: +237 222-333-444</p>
           </div>
           <div className="text-right">
             <h3 className="font-mono text-xs font-bold text-slate-700">CLINICAL AUDIT STATEMENT</h3>

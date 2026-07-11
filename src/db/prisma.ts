@@ -20,7 +20,48 @@ export async function ensureSeeded() {
   try {
     const userCount = await db.user.count();
     if (userCount > 0) {
-      console.log('Database already initialized with data.');
+      console.log('Database already initialized with data. Running automated phone format migrations...');
+      
+      const allDoctors = await db.doctor.findMany({
+        where: {
+          phone: {
+            startsWith: '+1 (555)'
+          }
+        }
+      });
+      for (const doc of allDoctors) {
+        const formattedPhone = doc.phone
+          .replace('+1 (555)', '+237 6')
+          .replace('123-4567', '77-123-456')
+          .replace('234-5678', '99-234-567')
+          .replace('345-6789', '88-345-678');
+        await db.doctor.update({
+          where: { id: doc.id },
+          data: { phone: formattedPhone }
+        });
+      }
+
+      const allPatients = await db.patient.findMany({
+        where: {
+          phone: {
+            startsWith: '+1 (555)'
+          }
+        }
+      });
+      for (const pat of allPatients) {
+        const formattedPhone = pat.phone
+          .replace('+1 (555)', '+237 6')
+          .replace('987-6543', '75-987-654')
+          .replace('876-5432', '95-876-543')
+          .replace('007-1939', '57-007-193')
+          .replace('111-2222', '71-112-222')
+          .replace('333-4444', '93-334-444');
+        await db.patient.update({
+          where: { id: pat.id },
+          data: { phone: formattedPhone }
+        });
+      }
+
       return;
     }
 
@@ -99,7 +140,7 @@ export async function ensureSeeded() {
         userId: docUser.id,
         name: 'Dr. Gregory House',
         email: 'house@hospital.com',
-        phone: '+1 (555) 123-4567',
+        phone: '+237 677-123-456',
         departmentId: dept3.id,
         specialization: 'Diagnostic Medicine / Nephrology',
         schedule: 'Mon, Tue, Thu 09:00 - 15:00'
@@ -111,7 +152,7 @@ export async function ensureSeeded() {
         id: 'doc-2',
         name: 'Dr. Sarah Connor',
         email: 'connor@hospital.com',
-        phone: '+1 (555) 234-5678',
+        phone: '+237 699-234-567',
         departmentId: dept1.id,
         specialization: 'Interventional Cardiology',
         schedule: 'Wed, Fri 08:00 - 16:00'
@@ -123,7 +164,7 @@ export async function ensureSeeded() {
         id: 'doc-3',
         name: 'Dr. Jane Foster',
         email: 'foster@hospital.com',
-        phone: '+1 (555) 345-6789',
+        phone: '+237 688-345-678',
         departmentId: dept2.id,
         specialization: 'Pediatric Endocrinology',
         schedule: 'Mon, Wed 10:00 - 18:00'
@@ -136,7 +177,7 @@ export async function ensureSeeded() {
         id: 'pat-1',
         name: 'John Doe',
         email: 'johndoe@email.com',
-        phone: '+1 (555) 987-6543',
+        phone: '+237 675-987-654',
         dob: '1985-05-15',
         gender: 'Male',
         bloodGroup: 'O+',
@@ -150,7 +191,7 @@ export async function ensureSeeded() {
         id: 'pat-2',
         name: 'Mary Jane',
         email: 'maryjane@email.com',
-        phone: '+1 (555) 876-5432',
+        phone: '+237 695-876-543',
         dob: '1992-09-20',
         gender: 'Female',
         bloodGroup: 'A-',
@@ -164,7 +205,7 @@ export async function ensureSeeded() {
         id: 'pat-3',
         name: 'Bruce Wayne',
         email: 'bruce@waynecorp.com',
-        phone: '+1 (555) 007-1939',
+        phone: '+237 657-007-193',
         dob: '1979-02-19',
         gender: 'Male',
         bloodGroup: 'AB+',
@@ -178,7 +219,7 @@ export async function ensureSeeded() {
         id: 'pat-4',
         name: 'Clark Kent',
         email: 'clark@dailyplanet.com',
-        phone: '+1 (555) 111-2222',
+        phone: '+237 671-112-222',
         dob: '1982-06-18',
         gender: 'Male',
         bloodGroup: 'O-',
@@ -192,7 +233,7 @@ export async function ensureSeeded() {
         id: 'pat-5',
         name: 'Diana Prince',
         email: 'diana@themysis.org',
-        phone: '+1 (555) 333-4444',
+        phone: '+237 693-334-444',
         dob: '1988-11-10',
         gender: 'Female',
         bloodGroup: 'B+',
