@@ -173,6 +173,152 @@ export async function ensureSeeded() {
         }
       });
 
+      // Ensure new departments are seeded on startup
+      await db.department.upsert({
+        where: { id: 'dept-4' },
+        update: {},
+        create: {
+          id: 'dept-4',
+          name: 'Dentistry',
+          description: 'Expert dental care including orthodontics, cleanings, and oral surgery.'
+        }
+      });
+
+      await db.department.upsert({
+        where: { id: 'dept-5' },
+        update: {},
+        create: {
+          id: 'dept-5',
+          name: 'Neurology',
+          description: 'Specialized diagnosis and treatment of brain, spinal cord, and nerve disorders.'
+        }
+      });
+
+      await db.department.upsert({
+        where: { id: 'dept-6' },
+        update: {},
+        create: {
+          id: 'dept-6',
+          name: 'Emergency Department',
+          description: '24/7 urgent medical attention for acute illnesses and traumatic injuries.'
+        }
+      });
+
+      await db.department.upsert({
+        where: { id: 'dept-7' },
+        update: {},
+        create: {
+          id: 'dept-7',
+          name: 'Pulmonology',
+          description: 'Advanced medical treatment for lung, respiratory tract, and breathing conditions.'
+        }
+      });
+
+      await db.department.upsert({
+        where: { id: 'dept-8' },
+        update: {},
+        create: {
+          id: 'dept-8',
+          name: 'Orthopedics',
+          description: 'Care for musculoskeletal system including bones, joints, ligaments, tendons, and muscles.'
+        }
+      });
+
+      await db.department.upsert({
+        where: { id: 'dept-9' },
+        update: {},
+        create: {
+          id: 'dept-9',
+          name: 'Dermatology',
+          description: 'Comprehensive treatment for hair, skin, nails, and related cosmetic concerns.'
+        }
+      });
+
+      // Ensure new doctors are seeded on startup
+      await db.doctor.upsert({
+        where: { id: 'doc-4' },
+        update: {},
+        create: {
+          id: 'doc-4',
+          name: 'Dr. Susan Calvin',
+          email: 'calvin@hospital.com',
+          phone: '+237 671-555-011',
+          departmentId: 'dept-4',
+          specialization: 'Pediatric Dentistry & Orthodontics',
+          schedule: 'Tue, Thu 09:00 - 17:00'
+        }
+      });
+
+      await db.doctor.upsert({
+        where: { id: 'doc-5' },
+        update: {},
+        create: {
+          id: 'doc-5',
+          name: 'Dr. Stephen Strange',
+          email: 'strange@hospital.com',
+          phone: '+237 672-666-022',
+          departmentId: 'dept-5',
+          specialization: 'Neurosurgery & Cognitive Neurology',
+          schedule: 'Mon, Wed, Fri 09:00 - 16:00'
+        }
+      });
+
+      await db.doctor.upsert({
+        where: { id: 'doc-6' },
+        update: {},
+        create: {
+          id: 'doc-6',
+          name: 'Dr. John Carter',
+          email: 'carter@hospital.com',
+          phone: '+237 673-777-033',
+          departmentId: 'dept-6',
+          specialization: 'Trauma & Emergency Medicine',
+          schedule: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun (Rotational)'
+        }
+      });
+
+      await db.doctor.upsert({
+        where: { id: 'doc-7' },
+        update: {},
+        create: {
+          id: 'doc-7',
+          name: 'Dr. Leonard McCoy',
+          email: 'mccoy@hospital.com',
+          phone: '+237 674-888-044',
+          departmentId: 'dept-7',
+          specialization: 'Pulmonary Care & Respiratory Medicine',
+          schedule: 'Tue, Wed, Thu 10:00 - 15:00'
+        }
+      });
+
+      await db.doctor.upsert({
+        where: { id: 'doc-8' },
+        update: {},
+        create: {
+          id: 'doc-8',
+          name: 'Dr. Hank McCoy',
+          email: 'beast@hospital.com',
+          phone: '+237 675-999-055',
+          departmentId: 'dept-8',
+          specialization: 'Orthopedic Surgery & Biomechanics',
+          schedule: 'Mon, Fri 08:00 - 12:00'
+        }
+      });
+
+      await db.doctor.upsert({
+        where: { id: 'doc-9' },
+        update: {},
+        create: {
+          id: 'doc-9',
+          name: 'Dr. Beverly Crusher',
+          email: 'crusher@hospital.com',
+          phone: '+237 676-111-066',
+          departmentId: 'dept-9',
+          specialization: 'Clinical Dermatology & Immunology',
+          schedule: 'Mon, Wed 09:00 - 14:00'
+        }
+      });
+
       // Seed past medical records for other patients if they don't exist
       const defaultDocForMR = await db.doctor.findFirst() || { id: 'doc-1' };
       const defaultDocId = defaultDocForMR.id;
@@ -181,7 +327,7 @@ export async function ensureSeeded() {
         {
           id: 'rec-2',
           patientId: 'pat-1',
-          doctorId: defaultDocId,
+          doctorId: 'doc-1', // House - Cardiology/General Medicine
           symptoms: 'Persistent dry cough and fatigue for 3 weeks.',
           diagnosis: 'Post-viral bronchial hyperreactivity.',
           treatment: 'Hydration, avoidance of triggers, inhaled bronchodilator.',
@@ -191,7 +337,7 @@ export async function ensureSeeded() {
         {
           id: 'rec-3',
           patientId: 'pat-2',
-          doctorId: defaultDocId,
+          doctorId: 'doc-7', // McCoy - Pulmonology
           symptoms: 'Shortness of breath with physical activity.',
           diagnosis: 'Mild persistent Asthma.',
           treatment: 'Daily controller medication and rescue inhaler.',
@@ -201,7 +347,7 @@ export async function ensureSeeded() {
         {
           id: 'rec-4',
           patientId: 'pat-4',
-          doctorId: defaultDocId,
+          doctorId: 'doc-5', // Strange - Neurology
           symptoms: 'No physical symptoms. Requested annual physiological baseline.',
           diagnosis: 'Exceptional bone density, cellular vitality, and cardiac efficiency.',
           treatment: 'None needed. Maintain current dietary and environmental habits.',
@@ -211,7 +357,7 @@ export async function ensureSeeded() {
         {
           id: 'rec-5',
           patientId: 'pat-5',
-          doctorId: defaultDocId,
+          doctorId: 'doc-8', // Hank McCoy - Orthopedics
           symptoms: 'Aesthetic check-up, general athletic stress review.',
           diagnosis: 'Peak athletic physiological state. Superior cardiovascular reserves.',
           treatment: 'Regular rest cycles between intensive field deployments.',
@@ -221,7 +367,7 @@ export async function ensureSeeded() {
         {
           id: 'rec-6',
           patientId: 'pat-6',
-          doctorId: defaultDocId,
+          doctorId: 'doc-6', // John Carter - Emergency Department
           symptoms: 'Extreme fatigue and elevated body temperature (39.5 C).',
           diagnosis: 'Benign physiological hyper-metabolism.',
           treatment: 'High caloric diet and increased fluid intake. 12 hours undisturbed rest.',
@@ -231,7 +377,7 @@ export async function ensureSeeded() {
         {
           id: 'rec-7',
           patientId: 'pat-7',
-          doctorId: defaultDocId,
+          doctorId: 'doc-8', // Hank McCoy - Orthopedics
           symptoms: 'Ankle sprain following rapid acceleration.',
           diagnosis: 'Grade I ligament strain - already 90% healed at assessment.',
           treatment: 'Light stretching, temporary restriction of high-speed maneuvers.',
@@ -241,10 +387,14 @@ export async function ensureSeeded() {
       ];
 
       for (const rec of recordsToSeed) {
+        // Find if the doctor exists, otherwise fallback to any doctor
+        const docExists = await db.doctor.findFirst({ where: { id: rec.doctorId } });
+        const finalDocId = docExists ? rec.doctorId : defaultDocId;
+
         await db.medicalRecord.upsert({
           where: { id: rec.id },
-          update: {},
-          create: rec
+          update: { doctorId: finalDocId },
+          create: { ...rec, doctorId: finalDocId }
         });
       }
 
@@ -319,6 +469,54 @@ export async function ensureSeeded() {
       }
     });
 
+    const dept4 = await db.department.create({
+      data: {
+        id: 'dept-4',
+        name: 'Dentistry',
+        description: 'Expert dental care including orthodontics, cleanings, and oral surgery.'
+      }
+    });
+
+    const dept5 = await db.department.create({
+      data: {
+        id: 'dept-5',
+        name: 'Neurology',
+        description: 'Specialized diagnosis and treatment of brain, spinal cord, and nerve disorders.'
+      }
+    });
+
+    const dept6 = await db.department.create({
+      data: {
+        id: 'dept-6',
+        name: 'Emergency Department',
+        description: '24/7 urgent medical attention for acute illnesses and traumatic injuries.'
+      }
+    });
+
+    const dept7 = await db.department.create({
+      data: {
+        id: 'dept-7',
+        name: 'Pulmonology',
+        description: 'Advanced medical treatment for lung, respiratory tract, and breathing conditions.'
+      }
+    });
+
+    const dept8 = await db.department.create({
+      data: {
+        id: 'dept-8',
+        name: 'Orthopedics',
+        description: 'Care for musculoskeletal system including bones, joints, ligaments, tendons, and muscles.'
+      }
+    });
+
+    const dept9 = await db.department.create({
+      data: {
+        id: 'dept-9',
+        name: 'Dermatology',
+        description: 'Comprehensive treatment for hair, skin, nails, and related cosmetic concerns.'
+      }
+    });
+
     // 3. Seed Doctors
     const doc1 = await db.doctor.create({
       data: {
@@ -354,6 +552,78 @@ export async function ensureSeeded() {
         departmentId: dept2.id,
         specialization: 'Pediatric Endocrinology',
         schedule: 'Mon, Wed 10:00 - 18:00'
+      }
+    });
+
+    const doc4 = await db.doctor.create({
+      data: {
+        id: 'doc-4',
+        name: 'Dr. Susan Calvin',
+        email: 'calvin@hospital.com',
+        phone: '+237 671-555-011',
+        departmentId: dept4.id,
+        specialization: 'Pediatric Dentistry & Orthodontics',
+        schedule: 'Tue, Thu 09:00 - 17:00'
+      }
+    });
+
+    const doc5 = await db.doctor.create({
+      data: {
+        id: 'doc-5',
+        name: 'Dr. Stephen Strange',
+        email: 'strange@hospital.com',
+        phone: '+237 672-666-022',
+        departmentId: dept5.id,
+        specialization: 'Neurosurgery & Cognitive Neurology',
+        schedule: 'Mon, Wed, Fri 09:00 - 16:00'
+      }
+    });
+
+    const doc6 = await db.doctor.create({
+      data: {
+        id: 'doc-6',
+        name: 'Dr. John Carter',
+        email: 'carter@hospital.com',
+        phone: '+237 673-777-033',
+        departmentId: dept6.id,
+        specialization: 'Trauma & Emergency Medicine',
+        schedule: 'Mon, Tue, Wed, Thu, Fri, Sat, Sun (Rotational)'
+      }
+    });
+
+    const doc7 = await db.doctor.create({
+      data: {
+        id: 'doc-7',
+        name: 'Dr. Leonard McCoy',
+        email: 'mccoy@hospital.com',
+        phone: '+237 674-888-044',
+        departmentId: dept7.id,
+        specialization: 'Pulmonary Care & Respiratory Medicine',
+        schedule: 'Tue, Wed, Thu 10:00 - 15:00'
+      }
+    });
+
+    const doc8 = await db.doctor.create({
+      data: {
+        id: 'doc-8',
+        name: 'Dr. Hank McCoy',
+        email: 'beast@hospital.com',
+        phone: '+237 675-999-055',
+        departmentId: dept8.id,
+        specialization: 'Orthopedic Surgery & Biomechanics',
+        schedule: 'Mon, Fri 08:00 - 12:00'
+      }
+    });
+
+    const doc9 = await db.doctor.create({
+      data: {
+        id: 'doc-9',
+        name: 'Dr. Beverly Crusher',
+        email: 'crusher@hospital.com',
+        phone: '+237 676-111-066',
+        departmentId: dept9.id,
+        specialization: 'Clinical Dermatology & Immunology',
+        schedule: 'Mon, Wed 09:00 - 14:00'
       }
     });
 
@@ -545,7 +815,7 @@ export async function ensureSeeded() {
       data: {
         id: 'rec-3',
         patientId: pat2.id,
-        doctorId: doc3.id,
+        doctorId: doc7.id, // McCoy - Pulmonology
         symptoms: 'Shortness of breath with physical activity.',
         diagnosis: 'Mild persistent Asthma.',
         treatment: 'Daily controller medication and rescue inhaler.',
@@ -558,7 +828,7 @@ export async function ensureSeeded() {
       data: {
         id: 'rec-4',
         patientId: pat4.id,
-        doctorId: doc1.id,
+        doctorId: doc5.id, // Strange - Neurology
         symptoms: 'No physical symptoms. Requested annual physiological baseline.',
         diagnosis: 'Exceptional bone density, cellular vitality, and cardiac efficiency.',
         treatment: 'None needed. Maintain current dietary and environmental habits.',
@@ -571,7 +841,7 @@ export async function ensureSeeded() {
       data: {
         id: 'rec-5',
         patientId: pat5.id,
-        doctorId: doc1.id,
+        doctorId: doc8.id, // Hank McCoy - Orthopedics
         symptoms: 'Aesthetic check-up, general athletic stress review.',
         diagnosis: 'Peak athletic physiological state. Superior cardiovascular reserves.',
         treatment: 'Regular rest cycles between intensive field deployments.',
@@ -584,7 +854,7 @@ export async function ensureSeeded() {
       data: {
         id: 'rec-6',
         patientId: pat6.id,
-        doctorId: doc1.id,
+        doctorId: doc6.id, // John Carter - Emergency Department
         symptoms: 'Extreme fatigue and elevated body temperature (39.5 C).',
         diagnosis: 'Benign physiological hyper-metabolism.',
         treatment: 'High caloric diet and increased fluid intake. 12 hours undisturbed rest.',
@@ -597,7 +867,7 @@ export async function ensureSeeded() {
       data: {
         id: 'rec-7',
         patientId: pat7.id,
-        doctorId: doc1.id,
+        doctorId: doc8.id, // Hank McCoy - Orthopedics
         symptoms: 'Ankle sprain following rapid acceleration.',
         diagnosis: 'Grade I ligament strain - already 90% healed at assessment.',
         treatment: 'Light stretching, temporary restriction of high-speed maneuvers.',

@@ -33,13 +33,14 @@ router.post('/', async (req, res) => {
       }
     });
 
-    // Automatically find or create a default doctor to assign to this initial EMR
-    let defaultDoctor = await prisma.doctor.findFirst();
-    if (!defaultDoctor) {
+    // Automatically find and assign a random doctor from the full list of specialists (not just Dr. House)
+    const doctors = await prisma.doctor.findMany();
+    let assignedDoctor = doctors[0];
+    if (!assignedDoctor) {
       const defaultDept = await prisma.department.findFirst() || await prisma.department.create({
-        data: { id: 'dept-1', name: 'General Medicine', description: 'Primary Care' }
+        data: { id: 'dept-3', name: 'General Medicine', description: 'Primary Care' }
       });
-      defaultDoctor = await prisma.doctor.create({
+      assignedDoctor = await prisma.doctor.create({
         data: {
           id: 'doc-1',
           name: 'Dr. Gregory House',
@@ -50,17 +51,21 @@ router.post('/', async (req, res) => {
           schedule: 'Mon, Tue, Thu 09:00 - 15:00'
         }
       });
+    } else if (doctors.length > 1) {
+      // Pick a random doctor so that patients are distributed and attended to by different specialists
+      const randomIndex = Math.floor(Math.random() * doctors.length);
+      assignedDoctor = doctors[randomIndex];
     }
 
     // Automatically create a baseline medical record entry for the newly added patient
     await prisma.medicalRecord.create({
       data: {
         patientId: newPatient.id,
-        doctorId: defaultDoctor.id,
-        symptoms: 'Initial intake baseline profiling & diagnostic scan.',
-        diagnosis: `Routine entry assessment completed. General condition stable. Initial blood group noted as ${newPatient.bloodGroup}.`,
-        treatment: 'N/A. Periodic bi-annual general screening advised.',
-        prescription: 'N/A',
+        doctorId: assignedDoctor.id,
+        symptoms: 'Initial intake baseline profiling & general physical evaluation.',
+        diagnosis: `Routine clinical assessment completed by ${assignedDoctor.name}. General physical condition stable. Vital signs within normal parameters. Blood group ${newPatient.bloodGroup} logged. Initial history: ${newPatient.medicalHistory || 'No previous significant illnesses reported'}.`,
+        treatment: 'No active clinical treatment required. Scheduled for standard bi-annual general health screening.',
+        prescription: 'N/A - General Wellness Advice given.',
         date: new Date().toISOString().split('T')[0]
       }
     });
