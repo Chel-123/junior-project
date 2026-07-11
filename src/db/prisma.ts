@@ -88,6 +88,58 @@ export async function ensureSeeded() {
         }
       }
 
+      // Ensure there is at least one bill under 300,000 XAF as requested by the user
+      const hasLowBill = await db.bill.findFirst({
+        where: {
+          totalAmount: {
+            lt: 300000
+          }
+        }
+      });
+      if (!hasLowBill) {
+        const pat2 = await db.patient.findFirst({
+          where: { id: 'pat-2' }
+        });
+        if (pat2) {
+          const twoWeeksLaterStr = new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0];
+          await db.bill.upsert({
+            where: { id: 'bill-3' },
+            update: {
+              totalAmount: 245000.00,
+              paidAmount: 120000.00,
+              status: 'PARTIALLY_PAID',
+              dueDate: twoWeeksLaterStr
+            },
+            create: {
+              id: 'bill-3',
+              patientId: 'pat-2',
+              totalAmount: 245000.00,
+              paidAmount: 120000.00,
+              status: 'PARTIALLY_PAID',
+              dueDate: twoWeeksLaterStr
+            }
+          });
+
+          await db.payment.upsert({
+            where: { id: 'pay-2' },
+            update: {
+              amount: 120000.00,
+              paymentMethod: 'Mobile Money',
+              paymentDate: new Date().toISOString().split('T')[0],
+              transactionId: 'TXN-8374829104'
+            },
+            create: {
+              id: 'pay-2',
+              billId: 'bill-3',
+              amount: 120000.00,
+              paymentMethod: 'Mobile Money',
+              paymentDate: new Date().toISOString().split('T')[0],
+              transactionId: 'TXN-8374829104'
+            }
+          });
+        }
+      }
+
       return;
     }
 
@@ -367,6 +419,18 @@ export async function ensureSeeded() {
       }
     });
 
+    const bill3 = await db.bill.create({
+      data: {
+        id: 'bill-3',
+        patientId: pat2.id,
+        appointmentId: null,
+        totalAmount: 245000.00,
+        paidAmount: 120000.00,
+        status: 'PARTIALLY_PAID',
+        dueDate: twoWeeksLaterStr
+      }
+    });
+
     await db.payment.create({
       data: {
         id: 'pay-1',
@@ -375,6 +439,17 @@ export async function ensureSeeded() {
         paymentMethod: 'Card',
         paymentDate: twoDaysAgoStr,
         transactionId: 'TXN-9823412039'
+      }
+    });
+
+    await db.payment.create({
+      data: {
+        id: 'pay-2',
+        billId: bill3.id,
+        amount: 120000.00,
+        paymentMethod: 'Mobile Money',
+        paymentDate: todayStr,
+        transactionId: 'TXN-8374829104'
       }
     });
 
