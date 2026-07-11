@@ -63,7 +63,106 @@ export async function ensureSeeded() {
       }
 
       // Ensure all existing bills and payments are scaled to millions of francs (XAF)
-      const allBills = await db.bill.findMany();
+      // and hospital income adds up to exactly 10,000,000 francs.
+      
+      // Delete any payment that isn't pay-1 or pay-2 to keep the sum exact
+      await db.payment.deleteMany({
+        where: {
+          id: {
+            notIn: ['pay-1', 'pay-2']
+          }
+        }
+      });
+
+      // Update or create bill-1 (totalAmount: 9880000.00, paidAmount: 9880000.00)
+      const pat3 = await db.patient.findFirst({ where: { id: 'pat-3' } });
+      const pat3Id = pat3 ? pat3.id : 'pat-3';
+      const apt3 = await db.appointment.findFirst({ where: { id: 'apt-3' } });
+      const apt3Id = apt3 ? apt3.id : null;
+
+      await db.bill.upsert({
+        where: { id: 'bill-1' },
+        update: {
+          totalAmount: 9880000.00,
+          paidAmount: 9880000.00,
+          status: 'PAID'
+        },
+        create: {
+          id: 'bill-1',
+          patientId: pat3Id,
+          appointmentId: apt3Id,
+          totalAmount: 9880000.00,
+          paidAmount: 9880000.00,
+          status: 'PAID',
+          dueDate: new Date().toISOString().split('T')[0]
+        }
+      });
+
+      // Update or create pay-1 (amount: 9880000.00)
+      await db.payment.upsert({
+        where: { id: 'pay-1' },
+        update: {
+          amount: 9880000.00,
+          billId: 'bill-1'
+        },
+        create: {
+          id: 'pay-1',
+          billId: 'bill-1',
+          amount: 9880000.00,
+          paymentMethod: 'Card',
+          paymentDate: new Date(Date.now() - 86400000 * 2).toISOString().split('T')[0],
+          transactionId: 'TXN-9823412039'
+        }
+      });
+
+      // Update or create bill-3 (totalAmount: 245000.00, paidAmount: 120000.00) - keeps a bill under 300,000 XAF
+      const pat2 = await db.patient.findFirst({ where: { id: 'pat-2' } });
+      const pat2Id = pat2 ? pat2.id : 'pat-2';
+      const twoWeeksLaterStr = new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0];
+
+      await db.bill.upsert({
+        where: { id: 'bill-3' },
+        update: {
+          totalAmount: 245000.00,
+          paidAmount: 120000.00,
+          status: 'PARTIALLY_PAID',
+          dueDate: twoWeeksLaterStr
+        },
+        create: {
+          id: 'bill-3',
+          patientId: pat2Id,
+          totalAmount: 245000.00,
+          paidAmount: 120000.00,
+          status: 'PARTIALLY_PAID',
+          dueDate: twoWeeksLaterStr
+        }
+      });
+
+      // Update or create pay-2 (amount: 120000.00)
+      await db.payment.upsert({
+        where: { id: 'pay-2' },
+        update: {
+          amount: 120000.00,
+          billId: 'bill-3'
+        },
+        create: {
+          id: 'pay-2',
+          billId: 'bill-3',
+          amount: 120000.00,
+          paymentMethod: 'Mobile Money',
+          paymentDate: new Date().toISOString().split('T')[0],
+          transactionId: 'TXN-8374829104'
+        }
+      });
+
+      // Also scale any other bills to millions if they aren't scaled
+      const allBills = await db.bill.findMany({
+        where: {
+          id: {
+            notIn: ['bill-1', 'bill-3']
+          }
+        }
+      });
       for (const bill of allBills) {
         if (bill.totalAmount < 100000) {
           await db.bill.update({
@@ -71,70 +170,6 @@ export async function ensureSeeded() {
             data: {
               totalAmount: bill.totalAmount * 10000,
               paidAmount: bill.paidAmount * 10000
-            }
-          });
-        }
-      }
-
-      const allPayments = await db.payment.findMany();
-      for (const payment of allPayments) {
-        if (payment.amount < 100000) {
-          await db.payment.update({
-            where: { id: payment.id },
-            data: {
-              amount: payment.amount * 10000
-            }
-          });
-        }
-      }
-
-      // Ensure there is at least one bill under 300,000 XAF as requested by the user
-      const hasLowBill = await db.bill.findFirst({
-        where: {
-          totalAmount: {
-            lt: 300000
-          }
-        }
-      });
-      if (!hasLowBill) {
-        const pat2 = await db.patient.findFirst({
-          where: { id: 'pat-2' }
-        });
-        if (pat2) {
-          const twoWeeksLaterStr = new Date(Date.now() + 86400000 * 14).toISOString().split('T')[0];
-          await db.bill.upsert({
-            where: { id: 'bill-3' },
-            update: {
-              totalAmount: 245000.00,
-              paidAmount: 120000.00,
-              status: 'PARTIALLY_PAID',
-              dueDate: twoWeeksLaterStr
-            },
-            create: {
-              id: 'bill-3',
-              patientId: 'pat-2',
-              totalAmount: 245000.00,
-              paidAmount: 120000.00,
-              status: 'PARTIALLY_PAID',
-              dueDate: twoWeeksLaterStr
-            }
-          });
-
-          await db.payment.upsert({
-            where: { id: 'pay-2' },
-            update: {
-              amount: 120000.00,
-              paymentMethod: 'Mobile Money',
-              paymentDate: new Date().toISOString().split('T')[0],
-              transactionId: 'TXN-8374829104'
-            },
-            create: {
-              id: 'pay-2',
-              billId: 'bill-3',
-              amount: 120000.00,
-              paymentMethod: 'Mobile Money',
-              paymentDate: new Date().toISOString().split('T')[0],
-              transactionId: 'TXN-8374829104'
             }
           });
         }
@@ -882,8 +917,8 @@ export async function ensureSeeded() {
         id: 'bill-1',
         patientId: pat3.id,
         appointmentId: apt3.id,
-        totalAmount: 3500000.00,
-        paidAmount: 3500000.00,
+        totalAmount: 9880000.00,
+        paidAmount: 9880000.00,
         status: 'PAID',
         dueDate: todayStr,
         createdAt: new Date(Date.now() - 86400000 * 2)
@@ -919,7 +954,7 @@ export async function ensureSeeded() {
       data: {
         id: 'pay-1',
         billId: bill1.id,
-        amount: 3500000.00,
+        amount: 9880000.00,
         paymentMethod: 'Card',
         paymentDate: twoDaysAgoStr,
         transactionId: 'TXN-9823412039'
