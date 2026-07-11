@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   Stethoscope, 
@@ -7,7 +7,17 @@ import {
   ArrowUpRight, 
   Clock, 
   Sparkles,
-  Heart
+  Heart,
+  X,
+  Search,
+  ShieldCheck,
+  FileText,
+  Activity,
+  ChevronRight,
+  TrendingUp,
+  Award,
+  DollarSign,
+  Briefcase
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -21,7 +31,7 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { UserRole } from '../types';
+import { UserRole, Patient, Doctor, Appointment, Bill, MedicalRecord, BillStatus } from '../types';
 
 interface DashboardViewProps {
   stats: {
@@ -36,6 +46,11 @@ interface DashboardViewProps {
   appointmentChartData: any[];
   userRole: UserRole;
   onNavigate: (tab: string) => void;
+  patients?: Patient[];
+  doctors?: Doctor[];
+  appointments?: Appointment[];
+  bills?: Bill[];
+  records?: MedicalRecord[];
 }
 
 const COLORS = ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'];
@@ -47,30 +62,82 @@ export default function DashboardView({
   revenueChartData,
   appointmentChartData,
   userRole,
-  onNavigate
+  onNavigate,
+  patients = [],
+  doctors = [],
+  appointments = [],
+  bills = [],
+  records = []
 }: DashboardViewProps) {
+  // Modal states
+  const [activeModal, setActiveModal] = useState<'patients' | 'doctors' | 'appointments' | 'billing' | 'station' | 'billingChart' | 'metricsChart' | null>(null);
+  const [selectedAppointment, setSelectedAppointment] = useState<any | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<any | null>(null);
   
+  // Search states inside modals
+  const [modalSearch, setModalSearch] = useState('');
+
+  // Filter lists inside modals based on search
+  const filteredPatients = patients.filter(p => 
+    p.name.toLowerCase().includes(modalSearch.toLowerCase()) || 
+    p.email.toLowerCase().includes(modalSearch.toLowerCase()) ||
+    (p.phone && p.phone.includes(modalSearch))
+  );
+
+  const filteredDoctors = doctors.filter(d => 
+    d.name.toLowerCase().includes(modalSearch.toLowerCase()) || 
+    d.specialization.toLowerCase().includes(modalSearch.toLowerCase()) ||
+    d.email.toLowerCase().includes(modalSearch.toLowerCase())
+  );
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-300">
+      
       {/* Welcome Banner */}
       <div className="bg-slate-900 rounded-2xl p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-mono font-semibold flex items-center gap-1">
+            <span className="bg-emerald-500/20 text-emerald-400 text-xs px-2.5 py-1 rounded-full font-mono font-semibold flex items-center gap-1 animate-pulse">
               <Sparkles className="w-3.5 h-3.5" />
               Live Workspace Active
             </span>
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Clinical Operations Command</h2>
           <p className="text-slate-400 text-sm mt-1 max-w-xl">
-            Welcome back to Eden Phoenix Hospital. You are logged in as <span className="text-emerald-400 font-medium underline decoration-emerald-500/30">{userRole}</span>. Manage scheduling, track medical records, and oversee financials in real-time.
+            Welcome back to Eden Phoenix Hospital. You are logged in as <span className="text-emerald-400 font-medium underline decoration-emerald-500/30">{userRole}</span>. Click on any widget to explore records. Manage{' '}
+            <span 
+              onClick={() => onNavigate('appointments')}
+              className="text-emerald-400 hover:text-emerald-300 cursor-pointer underline decoration-dotted font-semibold"
+            >
+              scheduling
+            </span>, track{' '}
+            <span 
+              onClick={() => onNavigate('records')}
+              className="text-emerald-400 hover:text-emerald-300 cursor-pointer underline decoration-dotted font-semibold"
+            >
+              medical records
+            </span>, and oversee{' '}
+            <span 
+              onClick={() => onNavigate('billing')}
+              className="text-emerald-400 hover:text-emerald-300 cursor-pointer underline decoration-dotted font-semibold"
+            >
+              financials
+            </span>{' '}
+            in real-time.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="px-4 py-2 bg-slate-800 rounded-xl border border-slate-700/50 text-right">
+        <div 
+          onClick={() => setActiveModal('station')}
+          className="flex items-center gap-2 shrink-0 cursor-pointer hover:bg-slate-800 p-2.5 rounded-xl border border-slate-700/50 transition-all hover:scale-105 active:scale-95"
+          title="Click to view Station System Diagnostics"
+        >
+          <div className="px-3 py-1 bg-slate-800 rounded-lg text-right">
             <div className="text-[10px] text-slate-400 font-mono">STATION ID</div>
-            <div className="text-xs font-semibold text-slate-200">STM-WEST-01</div>
+            <div className="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+              STM-WEST-01
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+            </div>
           </div>
         </div>
       </div>
@@ -79,58 +146,98 @@ export default function DashboardView({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* Total Patients */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+        <div 
+          onClick={() => setActiveModal('patients')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-lg hover:border-emerald-500/40 transition-all cursor-pointer group hover:-translate-y-0.5 active:translate-y-0"
+          title="Click to view Patients Quick Index"
+        >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
               <Users className="w-6 h-6" />
             </div>
-            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md font-mono">+12% wk</span>
+            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg font-mono flex items-center gap-1">
+              +12% wk
+              <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">{stats.totalPatients}</h3>
-            <p className="text-sm text-slate-500 mt-1 font-medium">Registered Patients</p>
+            <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 font-sans group-hover:text-emerald-600 transition-colors">{stats.totalPatients}</h3>
+            <p className="text-sm text-slate-500 mt-1 font-semibold flex items-center gap-1.5">
+              Registered Patients
+              <span className="text-[10px] text-emerald-500 font-medium font-mono group-hover:underline">Open List</span>
+            </p>
           </div>
         </div>
 
         {/* Total Doctors */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+        <div 
+          onClick={() => setActiveModal('doctors')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-lg hover:border-indigo-500/40 transition-all cursor-pointer group hover:-translate-y-0.5 active:translate-y-0"
+          title="Click to view Active Specialist Directory"
+        >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+            <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
               <Stethoscope className="w-6 h-6" />
             </div>
-            <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md font-mono">Full-time</span>
+            <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg font-mono flex items-center gap-1">
+              Full-time
+              <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">{stats.totalDoctors}</h3>
-            <p className="text-sm text-slate-500 mt-1 font-medium">Active Specialists</p>
+            <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 font-sans group-hover:text-indigo-600 transition-colors">{stats.totalDoctors}</h3>
+            <p className="text-sm text-slate-500 mt-1 font-semibold flex items-center gap-1.5">
+              Active Specialists
+              <span className="text-[10px] text-indigo-500 font-medium font-mono group-hover:underline">Open List</span>
+            </p>
           </div>
         </div>
 
         {/* Scheduled Appointments */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+        <div 
+          onClick={() => setActiveModal('appointments')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-lg hover:border-amber-500/40 transition-all cursor-pointer group hover:-translate-y-0.5 active:translate-y-0"
+          title="Click to view Scheduled Visit Index"
+        >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+            <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
               <Calendar className="w-6 h-6" />
             </div>
-            <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-md font-mono">Today</span>
+            <span className="text-xs font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg font-mono flex items-center gap-1">
+              Today
+              <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">{stats.totalAppointments}</h3>
-            <p className="text-sm text-slate-500 mt-1 font-medium">Scheduled Visits</p>
+            <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 font-sans group-hover:text-amber-600 transition-colors">{stats.totalAppointments}</h3>
+            <p className="text-sm text-slate-500 mt-1 font-semibold flex items-center gap-1.5">
+              Scheduled Visits
+              <span className="text-[10px] text-amber-500 font-medium font-mono group-hover:underline">Open List</span>
+            </p>
           </div>
         </div>
 
         {/* Paid Revenue */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
+        <div 
+          onClick={() => setActiveModal('billing')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-lg hover:border-rose-500/40 transition-all cursor-pointer group hover:-translate-y-0.5 active:translate-y-0"
+          title="Click to view Clinical Revenue & Billings"
+        >
           <div className="flex items-center justify-between">
-            <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600">
+            <div className="w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform">
               <Banknote className="w-6 h-6" />
             </div>
-            <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md font-mono">Received</span>
+            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg font-mono flex items-center gap-1">
+              Received
+              <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </span>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-bold tracking-tight text-slate-900 font-sans">{stats.totalRevenue.toLocaleString()} XAF</h3>
-            <p className="text-sm text-slate-500 mt-1 font-medium">Hospital Income</p>
+            <h3 className="text-2xl font-extrabold tracking-tight text-slate-900 font-sans group-hover:text-rose-600 transition-colors">{stats.totalRevenue.toLocaleString()} XAF</h3>
+            <p className="text-sm text-slate-500 mt-1 font-semibold flex items-center gap-1.5">
+              Hospital Income
+              <span className="text-[10px] text-rose-500 font-medium font-mono group-hover:underline">Open Ledger</span>
+            </p>
           </div>
         </div>
 
@@ -140,14 +247,21 @@ export default function DashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Revenue Analytics (Bar Chart) */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80 lg:col-span-2">
+        <div 
+          onClick={() => setActiveModal('billingChart')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/80 lg:col-span-2 hover:border-emerald-500/30 hover:shadow-md cursor-pointer transition-all group"
+          title="Click to view detailed billing cashflow analytics"
+        >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-base font-semibold text-slate-900">Hospital Billing Cashflow</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Aggregated monthly income and invoice receipts</p>
+              <h3 className="text-base font-semibold text-slate-900 group-hover:text-emerald-600 transition-colors flex items-center gap-2">
+                Hospital Billing Cashflow
+                <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">Aggregated monthly income and invoice receipts (Click for full report)</p>
             </div>
             <div className="text-right">
-              <span className="text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full font-medium">Live Feed</span>
+              <span className="text-xs text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full font-semibold animate-pulse">Live Feed</span>
             </div>
           </div>
           <div className="h-72 w-full">
@@ -164,10 +278,17 @@ export default function DashboardView({
         </div>
 
         {/* Appointment Status Pie Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200/80">
+        <div 
+          onClick={() => setActiveModal('metricsChart')}
+          className="bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-indigo-500/30 hover:shadow-md cursor-pointer transition-all group"
+          title="Click to view appointment status metrics"
+        >
           <div className="mb-6">
-            <h3 className="text-base font-semibold text-slate-900">Appointment Metrics</h3>
-            <p className="text-xs text-slate-500 mt-0.5">Breakdown of consultations status</p>
+            <h3 className="text-base font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors flex items-center gap-2">
+              Appointment Metrics
+              <ArrowUpRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">Breakdown of consultation status (Click for breakdown)</p>
           </div>
           <div className="h-56 relative flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -190,15 +311,15 @@ export default function DashboardView({
             </ResponsiveContainer>
             {/* Centered Stat */}
             <div className="absolute text-center">
-              <div className="text-xl font-extrabold text-slate-800">{stats.totalAppointments}</div>
-              <div className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase font-mono">Total</div>
+              <div className="text-2xl font-extrabold text-slate-800">{stats.totalAppointments}</div>
+              <div className="text-[10px] text-slate-400 font-bold tracking-wider uppercase font-mono">Total</div>
             </div>
           </div>
           {/* Custom Legends */}
           <div className="grid grid-cols-2 gap-2 mt-4">
             {appointmentChartData.map((item, index) => (
-              <div key={item.name} className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+              <div key={item.name} className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
                 <span className="text-xs text-slate-600 font-medium truncate">{item.name} ({item.value})</span>
               </div>
             ))}
@@ -215,7 +336,7 @@ export default function DashboardView({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-semibold text-slate-900">Recent Check-ins & Bookings</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Most recent clinic appointment updates</p>
+              <p className="text-xs text-slate-500 mt-0.5">Most recent clinic appointments (Click any row to open details)</p>
             </div>
             <button 
               onClick={() => onNavigate('appointments')}
@@ -230,22 +351,27 @@ export default function DashboardView({
               <div className="py-8 text-center text-slate-400 text-sm">No scheduled appointments found.</div>
             ) : (
               recentAppointments.map((apt) => (
-                <div key={apt.id} className="py-3.5 flex items-center justify-between gap-4">
+                <div 
+                  key={apt.id} 
+                  onClick={() => setSelectedAppointment(apt)}
+                  className="py-3.5 flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-50/80 px-2.5 -mx-2.5 rounded-xl transition-all group"
+                  title="Click to view appointment details"
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-700">
+                    <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center font-bold text-xs text-slate-700 group-hover:bg-emerald-50 group-hover:text-emerald-700 transition-all">
                       {apt.patientName.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-800">{apt.patientName}</h4>
+                      <h4 className="text-sm font-semibold text-slate-800 group-hover:text-emerald-600 transition-all">{apt.patientName}</h4>
                       <p className="text-xs text-slate-500">Scheduled with <span className="font-medium text-slate-700">{apt.doctorName}</span></p>
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end gap-1">
                     <span className="text-[11px] font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded flex items-center gap-1 justify-end">
-                      <Clock className="w-3 h-3" />
+                      <Clock className="w-3 h-3 text-slate-400" />
                       {apt.date} at {apt.time}
                     </span>
-                    <span className={`inline-block mt-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                    <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
                       apt.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-800' :
                       apt.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
                       apt.status === 'CANCELLED' ? 'bg-rose-100 text-rose-800' :
@@ -265,7 +391,7 @@ export default function DashboardView({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-semibold text-slate-900">Recently Admitted Patients</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Most recent registrations into the hospital index</p>
+              <p className="text-xs text-slate-500 mt-0.5">Most recent registrations into the hospital (Click any row to open details)</p>
             </div>
             {userRole !== UserRole.DOCTOR && (
               <button 
@@ -282,13 +408,18 @@ export default function DashboardView({
               <div className="py-8 text-center text-slate-400 text-sm">No registered patients.</div>
             ) : (
               recentPatients.map((p) => (
-                <div key={p.id} className="py-3.5 flex items-center justify-between">
+                <div 
+                  key={p.id} 
+                  onClick={() => setSelectedPatient(p)}
+                  className="py-3.5 flex items-center justify-between cursor-pointer hover:bg-slate-50/80 px-2.5 -mx-2.5 rounded-xl transition-all group"
+                  title="Click to view patient profile chart"
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                    <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs group-hover:scale-105 transition-transform">
                       {p.bloodGroup || 'O+'}
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-800">{p.name}</h4>
+                      <h4 className="text-sm font-semibold text-slate-800 group-hover:text-emerald-600 transition-all">{p.name}</h4>
                       <p className="text-xs text-slate-500">{p.gender} • {p.phone}</p>
                     </div>
                   </div>
@@ -303,6 +434,702 @@ export default function DashboardView({
         </div>
 
       </div>
+
+
+      {/* ==================== DETAIL MODALS LAYER ==================== */}
+
+      {/* 1. REGISTERED PATIENTS DIRECTORY MODAL */}
+      {activeModal === 'patients' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Registered Patients Quick Index</h3>
+                  <p className="text-xs text-slate-400">Search and preview patient profiles</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setActiveModal(null); setModalSearch(''); }}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Search Input Bar */}
+            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <Search className="w-4 h-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search patients by name, email, or mobile..." 
+                value={modalSearch}
+                onChange={(e) => setModalSearch(e.target.value)}
+                className="w-full bg-transparent text-sm focus:outline-none placeholder-slate-400"
+              />
+              {modalSearch && (
+                <button onClick={() => setModalSearch('')} className="text-xs text-slate-400 hover:text-slate-600">Clear</button>
+              )}
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-3 flex-1 bg-slate-50/30">
+              {filteredPatients.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">No registered patients match your search.</div>
+              ) : (
+                filteredPatients.map((p) => (
+                  <div 
+                    key={p.id}
+                    onClick={() => {
+                      setSelectedPatient(p);
+                      setActiveModal(null);
+                    }}
+                    className="p-4 bg-white border border-slate-100 rounded-xl hover:border-emerald-500/40 transition-all cursor-pointer flex items-center justify-between hover:shadow-xs group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                        {p.bloodGroup}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-800 group-hover:text-emerald-600 transition-colors">{p.name}</h4>
+                        <p className="text-xs text-slate-400 font-mono">{p.email} • {p.phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-slate-400 font-mono font-medium">DOB: {p.dob}</span>
+                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50/80 flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-medium">Total: {patients.length} patients registered</span>
+              <button
+                onClick={() => {
+                  onNavigate('patients');
+                  setActiveModal(null);
+                }}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg transition-all"
+              >
+                Go to Full Patient Registry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. ACTIVE SPECIALISTS DIRECTORY MODAL */}
+      {activeModal === 'doctors' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
+                  <Stethoscope className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Active Specialists Registry</h3>
+                  <p className="text-xs text-slate-400">Hospital consulting medical staff roster</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setActiveModal(null); setModalSearch(''); }}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Search staff */}
+            <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <Search className="w-4 h-4 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search staff by name, specialization, or email..." 
+                value={modalSearch}
+                onChange={(e) => setModalSearch(e.target.value)}
+                className="w-full bg-transparent text-sm focus:outline-none placeholder-slate-400"
+              />
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 flex-1 bg-slate-50/30">
+              {filteredDoctors.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">No medical staff found matching your criteria.</div>
+              ) : (
+                filteredDoctors.map((doc) => (
+                  <div 
+                    key={doc.id}
+                    className="p-4 bg-white border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-slate-800 text-base">{doc.name}</h4>
+                        <span className="text-[10px] font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg border border-indigo-100">
+                          {doc.specialization}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 font-mono">Contact: {doc.email} • {doc.phone}</p>
+                      <div className="text-xs text-slate-600 flex items-center gap-1 bg-slate-50 px-2 py-1 rounded w-fit border border-slate-100/60 mt-1">
+                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>Hours: {doc.schedule}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50/80 flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-medium">Active Staff Size: {doctors.length} Doctors</span>
+              {userRole === UserRole.ADMIN && (
+                <button
+                  onClick={() => {
+                    onNavigate('doctors');
+                    setActiveModal(null);
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg transition-all"
+                >
+                  Go to Doctor Registries Tab
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. SCHEDULED APPOINTMENTS INDEX MODAL */}
+      {activeModal === 'appointments' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Scheduled Visit Records</h3>
+                  <p className="text-xs text-slate-400">All current consultation logs</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-3 flex-1 bg-slate-50/30">
+              {appointments.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">No scheduled visits in the records.</div>
+              ) : (
+                appointments.map((apt) => (
+                  <div 
+                    key={apt.id}
+                    onClick={() => {
+                      setSelectedAppointment(apt);
+                      setActiveModal(null);
+                    }}
+                    className="p-4 bg-white border border-slate-100 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-amber-500/40 cursor-pointer hover:shadow-xs group"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-slate-800 text-sm group-hover:text-amber-600 transition-colors">Patient: {apt.patientName || `Patient (ID: ${apt.patientId})`}</h4>
+                        <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                          apt.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-800' :
+                          apt.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                          apt.status === 'CANCELLED' ? 'bg-rose-100 text-rose-800' :
+                          'bg-amber-100 text-amber-800'
+                        }`}>
+                          {apt.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium">Consulting Clinician: {apt.doctorName || `Doctor (ID: ${apt.doctorId})`}</p>
+                      <p className="text-xs text-indigo-600 font-medium">Reason: {apt.reason}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-[11px] font-mono font-bold text-slate-600 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-md block">
+                        {apt.date} @ {apt.time}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50/80 flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-medium">Total: {appointments.length} total appointments logged</span>
+              <button
+                onClick={() => {
+                  onNavigate('appointments');
+                  setActiveModal(null);
+                }}
+                className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-4 py-2 rounded-lg transition-all"
+              >
+                Go to Appointments Tab
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. HOSPITAL INCOME / BILLINGS LEDGER MODAL */}
+      {activeModal === 'billing' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-rose-500/20 text-rose-400 rounded-xl flex items-center justify-center">
+                  <Banknote className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">Hospital Billings Ledger</h3>
+                  <p className="text-xs text-slate-400">Total verified financial billing receipts</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-3 flex-1 bg-slate-50/30">
+              {bills.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">No billing records found in database.</div>
+              ) : (
+                bills.map((bill) => (
+                  <div 
+                    key={bill.id}
+                    className="p-4 bg-white border border-slate-100 rounded-xl flex items-center justify-between hover:border-rose-500/30 hover:shadow-xs transition-all"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-semibold text-slate-400">INV-{bill.id.substring(0, 8).toUpperCase()}</span>
+                        <h4 className="font-bold text-slate-800 text-sm">Patient: {bill.patientName || `ID: ${bill.patientId}`}</h4>
+                      </div>
+                      <p className="text-xs text-slate-500">Date Issued: {new Date(bill.createdAt).toLocaleDateString()} • Due: {bill.dueDate}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-extrabold text-slate-900 block font-mono">
+                        {bill.totalAmount.toLocaleString()} XAF
+                      </span>
+                      <span className={`inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
+                        bill.status === BillStatus.PAID ? 'bg-emerald-100 text-emerald-800' :
+                        bill.status === BillStatus.PARTIALLY_PAID ? 'bg-amber-100 text-amber-800' :
+                        'bg-rose-100 text-rose-800'
+                      }`}>
+                        {bill.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50/80 flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-medium">Accumulated Assets: {stats.totalRevenue.toLocaleString()} XAF</span>
+              <button
+                onClick={() => {
+                  onNavigate('billing');
+                  setActiveModal(null);
+                }}
+                className="bg-rose-500 hover:bg-rose-600 text-white font-semibold px-4 py-2 rounded-lg transition-all"
+              >
+                Go to Billings & Payments Tab
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. STATION DIAGNOSTICS AUDIT MODAL */}
+      {activeModal === 'station' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-950 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">Station STM-WEST-01 Operational Audit</h3>
+                  <p className="text-xs text-slate-400">Secure real-time terminal diagnostic logs</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs font-mono bg-slate-950 text-emerald-400 leading-relaxed overflow-y-auto">
+              <div className="flex items-center gap-2 border-b border-slate-800 pb-2 text-slate-400 font-bold">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>SYSTEM DIAGNOSTIC STATS</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-y-2 text-slate-300">
+                <div>Terminal Node:</div>
+                <div className="text-emerald-400">STATION-WEST-MAIN</div>
+                
+                <div>Runtime Ingress:</div>
+                <div className="text-emerald-400">PORT 3000 (Compliant)</div>
+
+                <div>Active Connection:</div>
+                <div className="text-emerald-400">Prisma Client & Sqlite</div>
+
+                <div>Database Synchronization:</div>
+                <div className="text-emerald-400">Synced (100% OK)</div>
+
+                <div>Security Encryption:</div>
+                <div className="text-indigo-400 font-bold">SHA-256 AES GCM</div>
+
+                <div>Audit Registrar Signature:</div>
+                <div className="text-emerald-400 truncate">EP-ADM-REGISTRAR-092</div>
+              </div>
+
+              <div className="border-t border-slate-800 pt-3 space-y-1.5 text-[10px] text-slate-400">
+                <p>&gt; Connection established with Eden Phoenix Hospital ledger.</p>
+                <p>&gt; Medical records & EMR security audits check: PASSED</p>
+                <p>&gt; Real-time Cameroon +237 mobile number formats: VALIDATED</p>
+                <p>&gt; Offline-safe client cache state: OPERATIONAL</p>
+              </div>
+
+              <div className="p-3 bg-slate-900 border border-slate-800 rounded-lg text-[10px] text-slate-500">
+                Note: This is a secure Administrative Registrar monitoring portal. Access logs are captured in compliance with global health storage standards.
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-900 border-t border-slate-850 flex justify-end">
+              <button
+                onClick={() => setActiveModal(null)}
+                className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition-all"
+              >
+                Close Logs Console
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. APPOINTMENT METRICS CHART DETAILS MODAL */}
+      {activeModal === 'metricsChart' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-indigo-500/20 text-indigo-400 rounded-xl flex items-center justify-center">
+                  <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">Appointment Ratios & Status Metrics</h3>
+                  <p className="text-xs text-slate-400">Comprehensive summary of consultations</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {appointmentChartData.map((item, index) => {
+                  const percent = Math.round((item.value / (stats.totalAppointments || 1)) * 100);
+                  return (
+                    <div key={item.name} className="p-4 border border-slate-100 rounded-xl bg-slate-50 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{item.name}</span>
+                      </div>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-slate-800">{item.value}</span>
+                        <span className="text-xs font-mono font-medium text-slate-400">({percent}%)</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="p-4 bg-indigo-50 border border-indigo-100/60 rounded-xl flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                <div className="text-xs text-slate-600 space-y-1">
+                  <span className="font-bold text-indigo-900 block">Operational Assessment</span>
+                  <p>Most scheduled visits are successfully processed and finalized in compliance with the hospital's fast-track diagnostic pathways.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-xs">
+              <span className="text-slate-400 font-mono">Ledger Count: {stats.totalAppointments} visits</span>
+              <button
+                onClick={() => {
+                  onNavigate('appointments');
+                  setActiveModal(null);
+                }}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg transition-all"
+              >
+                Review Full Appointments List
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. BILLING CHART DETAILED CASHFLOW MODAL */}
+      {activeModal === 'billingChart' && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-emerald-500/20 text-emerald-400 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">Hospital Billing Monthly Cashflow</h3>
+                  <p className="text-xs text-slate-400">Breakdown of gross monthly revenue values</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[60vh]">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-400 font-bold uppercase tracking-wider">
+                    <th className="py-2.5">Billing Month</th>
+                    <th className="py-2.5 text-right">Gross Revenue</th>
+                    <th className="py-2.5 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-slate-700">
+                  {revenueChartData.map((row) => (
+                    <tr key={row.name} className="hover:bg-slate-50/60">
+                      <td className="py-3 font-semibold">{row.name}</td>
+                      <td className="py-3 text-right font-mono font-bold text-slate-900">{row.revenue.toLocaleString()} XAF</td>
+                      <td className="py-3 text-right">
+                        <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                          Audited
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl flex gap-3 text-xs">
+                <Award className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-emerald-900 block">Accumulated Income Summary</span>
+                  <p className="text-slate-600">The total gross revenue generated from consulting, inpatient procedures, and pharmacy receipts stands at <span className="font-bold text-emerald-700">{stats.totalRevenue.toLocaleString()} XAF</span>.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+              <button
+                onClick={() => {
+                  onNavigate('billing');
+                  setActiveModal(null);
+                }}
+                className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2 rounded-lg transition-all text-xs"
+              >
+                View Detailed Ledger Invoices
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. SINGLE APPOINTMENT DETAIL MODAL */}
+      {selectedAppointment && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div>
+                <h3 className="font-bold text-base">Appointment Ledger Details</h3>
+                <p className="text-xs text-slate-400">ID: {selectedAppointment.id}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedAppointment(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs">
+              
+              <div className="space-y-1.5">
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px]">Patient Name</span>
+                <p className="text-slate-800 font-bold text-sm bg-slate-50 p-2.5 rounded-xl border border-slate-100">{selectedAppointment.patientName || `Patient (ID: ${selectedAppointment.patientId})`}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Consulting Clinician</span>
+                  <p className="text-slate-700 font-semibold">{selectedAppointment.doctorName || `Doctor (ID: ${selectedAppointment.doctorId})`}</p>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Status</span>
+                  <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                    selectedAppointment.status === 'CONFIRMED' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                    selectedAppointment.status === 'COMPLETED' ? 'bg-blue-50 text-blue-800 border border-blue-200' :
+                    selectedAppointment.status === 'CANCELLED' ? 'bg-rose-50 text-rose-800 border border-rose-200' :
+                    'bg-amber-50 text-amber-800 border border-amber-200'
+                  }`}>
+                    {selectedAppointment.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Scheduled Date</span>
+                  <p className="text-slate-700 font-mono font-bold bg-slate-50 px-2 py-1 rounded w-fit border border-slate-100">{selectedAppointment.date}</p>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Consultation Time</span>
+                  <p className="text-slate-700 font-mono font-bold bg-slate-50 px-2 py-1 rounded w-fit border border-slate-100">{selectedAppointment.time}</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="block font-bold text-indigo-600 uppercase tracking-wider text-[9px]">Primary Reason for Visit</span>
+                <p className="text-slate-700 bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100/50 leading-relaxed">
+                  {selectedAppointment.reason}
+                </p>
+              </div>
+
+              {selectedAppointment.notes && (
+                <div className="space-y-1">
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px]">Special Instructions / Notes</span>
+                  <p className="text-slate-600 italic bg-slate-50 p-2.5 rounded-lg border border-slate-100 whitespace-pre-wrap">
+                    {selectedAppointment.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+              <button
+                onClick={() => {
+                  onNavigate('appointments');
+                  setSelectedAppointment(null);
+                }}
+                className="w-full py-2 bg-slate-900 hover:bg-slate-850 text-white font-semibold rounded-xl text-center text-xs transition-all"
+              >
+                Open Appointments Scheduler Tab
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 9. SINGLE PATIENT CHART DETAIL MODAL */}
+      {selectedPatient && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+                  {selectedPatient.bloodGroup || 'O+'}
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">Electronic Medical Chart</h3>
+                  <p className="text-xs text-slate-400">ID: {selectedPatient.id}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedPatient(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 text-xs overflow-y-auto max-h-[70vh]">
+              
+              <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+                <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200 font-bold text-lg">
+                  {selectedPatient.name.charAt(0)}
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-slate-800 text-base">{selectedPatient.name}</h4>
+                  <p className="text-xs text-slate-400 font-mono">{selectedPatient.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Mobile Phone</span>
+                  <p className="text-slate-700 font-semibold font-mono">{selectedPatient.phone}</p>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Date of Birth</span>
+                  <p className="text-slate-700 font-semibold font-mono">{selectedPatient.dob}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Gender Profile</span>
+                  <p className="text-slate-700 font-semibold">{selectedPatient.gender}</p>
+                </div>
+                <div>
+                  <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px] mb-1">Blood Group</span>
+                  <span className="text-rose-600 font-extrabold text-sm">{selectedPatient.bloodGroup}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="block font-bold text-slate-400 uppercase tracking-wider text-[9px]">Residential Address</span>
+                <p className="text-slate-700 bg-slate-50 p-2 rounded border border-slate-100">
+                  {selectedPatient.address}
+                </p>
+              </div>
+
+              <div className="space-y-1.5 border-t border-slate-100 pt-3">
+                <span className="block font-bold text-rose-700 uppercase tracking-wider text-[9px] flex items-center gap-1">
+                  <Heart className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+                  Known Allergies & Clinical History
+                </span>
+                <p className="text-slate-600 bg-rose-50/40 p-3 rounded-lg border border-rose-100 font-mono whitespace-pre-wrap">
+                  {selectedPatient.medicalHistory || 'No pre-existing clinical histories declared.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-2">
+              <button
+                onClick={() => {
+                  onNavigate('patients');
+                  setSelectedPatient(null);
+                }}
+                className="w-full py-2.5 bg-slate-900 hover:bg-slate-850 text-white font-semibold rounded-xl text-center text-xs transition-all"
+              >
+                Open Full Patients Registry Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

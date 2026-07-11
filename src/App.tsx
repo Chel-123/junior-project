@@ -647,6 +647,11 @@ export default function App() {
                 appointmentChartData={appointmentChartData}
                 userRole={userRole}
                 onNavigate={(tab) => setCurrentTab(tab)}
+                patients={patients}
+                doctors={doctors}
+                appointments={appointments}
+                bills={bills}
+                records={records}
               />
             )
           )}
