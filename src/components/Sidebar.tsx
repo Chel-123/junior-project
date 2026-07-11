@@ -30,7 +30,7 @@ export default function Sidebar({
   
   // List of all navigation items with roles allowed
   const menuItems = [
-    { id: 'dashboard', name: userRole === UserRole.PATIENT ? 'My Patient Portal' : 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE, UserRole.PATIENT] },
+    { id: 'dashboard', name: userRole === UserRole.PATIENT ? 'My Patient Portal' : 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.PATIENT] },
     { id: 'patients', name: 'Patient Directory', icon: Users, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE] },
     { id: 'doctors', name: 'Doctor Registries', icon: Stethoscope, roles: [UserRole.ADMIN] },
     { id: 'appointments', name: 'Appointments Manager', icon: Calendar, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
@@ -68,8 +68,15 @@ export default function Sidebar({
           onChange={(e) => {
             const role = e.target.value as UserRole;
             setUserRole(role);
-            // Default to overview dashboard when changing roles to avoid access errors
-            setCurrentTab('dashboard');
+            // Default to appropriate allowed tab when changing roles to avoid access errors
+            const defaultTabs: Record<UserRole, string> = {
+              [UserRole.ADMIN]: 'dashboard',
+              [UserRole.PATIENT]: 'dashboard',
+              [UserRole.DOCTOR]: 'appointments',
+              [UserRole.RECEPTIONIST]: 'patients',
+              [UserRole.NURSE]: 'patients',
+            };
+            setCurrentTab(defaultTabs[role] || 'dashboard');
           }}
           className="w-full bg-slate-800 text-slate-100 text-xs border border-slate-700 rounded-lg p-2 focus:outline-none focus:border-emerald-500 font-medium cursor-pointer"
         >

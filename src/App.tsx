@@ -30,37 +30,62 @@ import {
   LogOut, 
   UserCircle,
   UserPlus,
-  Lock
+  Lock,
+  Search
 } from 'lucide-react';
+import QuickAssist from './components/QuickAssist';
 
 export default function App() {
   const [userRole, setUserRole] = useState<UserRole>(UserRole.ADMIN);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isQuickAssistOpen, setIsQuickAssistOpen] = useState<boolean>(false);
+
+  // Global hotkey Ctrl+K / Cmd+K listener to trigger Quick Assist search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsQuickAssistOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Define default landing tabs for each specific persona/role
+  const DEFAULT_ROLE_TAB: Record<UserRole, string> = {
+    [UserRole.ADMIN]: 'dashboard',
+    [UserRole.PATIENT]: 'dashboard',
+    [UserRole.DOCTOR]: 'appointments',
+    [UserRole.RECEPTIONIST]: 'patients',
+    [UserRole.NURSE]: 'patients',
+  };
 
   // Parse path to set tab state cleanly, supporting proper URL routing
   const currentTab = (() => {
     const tab = location.pathname.replace(/^\//, '');
     const allowedTabs = ['dashboard', 'patients', 'doctors', 'appointments', 'medical-records', 'billing', 'departments', 'reports'];
-    return allowedTabs.includes(tab) ? tab : 'dashboard';
+    return allowedTabs.includes(tab) ? tab : DEFAULT_ROLE_TAB[userRole] || 'dashboard';
   })();
 
   const setCurrentTab = (tab: string) => {
     navigate(`/${tab}`);
   };
 
-  // Redirect root '/' or empty path to '/dashboard' if logged in
+  // Redirect root '/' or empty path to proper fallback tab if logged in
   useEffect(() => {
     if (currentUser && (location.pathname === '/' || location.pathname === '')) {
-      navigate('/dashboard', { replace: true });
+      const fallbackTab = DEFAULT_ROLE_TAB[userRole] || 'dashboard';
+      navigate(`/${fallbackTab}`, { replace: true });
     }
-  }, [currentUser, location.pathname, navigate]);
+  }, [currentUser, location.pathname, navigate, userRole]);
 
-  // Tab permission configuration mapping
+  // Tab permission configuration mapping - restrict overview dashboard to ADMIN and PATIENT (the patient portal)
   const tabRoles: Record<string, UserRole[]> = {
-    dashboard: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE, UserRole.PATIENT],
+    dashboard: [UserRole.ADMIN, UserRole.PATIENT],
     patients: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE],
     doctors: [UserRole.ADMIN],
     appointments: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE],
@@ -75,7 +100,8 @@ export default function App() {
     if (currentUser) {
       const allowedRoles = tabRoles[currentTab];
       if (allowedRoles && !allowedRoles.includes(userRole)) {
-        navigate('/dashboard', { replace: true });
+        const fallbackTab = DEFAULT_ROLE_TAB[userRole] || 'dashboard';
+        navigate(`/${fallbackTab}`, { replace: true });
       }
     }
   }, [currentTab, userRole, currentUser, navigate]);
@@ -138,7 +164,9 @@ export default function App() {
         fetch('/api/departments').then(r => r.json()),
         fetch('/api/bills').then(r => r.json()),
         fetch('/api/payments').then(r => r.json()),
-        fetch('/api/reports/dashboard').then(r => r.json())
+        userRole === UserRole.ADMIN 
+          ? fetch('/api/reports/dashboard').then(r => r.json())
+          : Promise.resolve({ stats: { totalPatients: 0, totalDoctors: 0, totalAppointments: 0, totalRevenue: 0 }, recentPatients: [], recentAppointments: [], revenueChartData: [], appointmentChartData: [] })
       ]);
 
       setPatients(resPat);
@@ -590,6 +618,23 @@ export default function App() {
             </span>
           </div>
 
+          {/* Quick Search Trigger Input Button */}
+          <div className="flex-1 max-w-sm mx-4 sm:mx-8">
+            <button
+              onClick={() => setIsQuickAssistOpen(true)}
+              className="w-full flex items-center justify-between gap-3 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-lg text-slate-400 text-xs text-left transition-all hover:border-slate-300 cursor-pointer shadow-xs"
+            >
+              <span className="flex items-center gap-2 font-medium">
+                <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span className="hidden sm:inline">Quick Assist Search...</span>
+                <span className="inline sm:hidden">Search...</span>
+              </span>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[9px] text-slate-400 font-mono font-bold leading-none shrink-0 shadow-2xs">
+                ⌘K
+              </kbd>
+            </button>
+          </div>
+
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
@@ -728,6 +773,19 @@ export default function App() {
 
         </main>
       </div>
+
+      <QuickAssist
+        isOpen={isQuickAssistOpen}
+        onClose={() => setIsQuickAssistOpen(false)}
+        patients={patients}
+        doctors={doctors}
+        appointments={appointments}
+        records={records}
+        departments={departments}
+        bills={bills}
+        setCurrentTab={setCurrentTab}
+        userRole={userRole}
+      />
     </div>
   );
 }
