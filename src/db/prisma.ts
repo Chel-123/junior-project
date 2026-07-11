@@ -140,6 +140,114 @@ export async function ensureSeeded() {
         }
       }
 
+      // Seed more patients if they don't exist
+      await db.patient.upsert({
+        where: { id: 'pat-6' },
+        update: {},
+        create: {
+          id: 'pat-6',
+          name: 'Peter Parker',
+          email: 'peter@dailybugle.com',
+          phone: '+237 672-444-555',
+          dob: '2001-08-10',
+          gender: 'Male',
+          bloodGroup: 'O+',
+          address: '20 Ingram St, Queens',
+          medicalHistory: 'Spider bite in childhood. High metabolism. Excellent agility.'
+        }
+      });
+
+      await db.patient.upsert({
+        where: { id: 'pat-7' },
+        update: {},
+        create: {
+          id: 'pat-7',
+          name: 'Barry Allen',
+          email: 'barry@centralcitypd.gov',
+          phone: '+237 674-888-999',
+          dob: '1990-03-28',
+          gender: 'Male',
+          bloodGroup: 'AB-',
+          address: '502 Flash Way, Central City',
+          medicalHistory: 'Accelerated healing, lightning strike survivor.'
+        }
+      });
+
+      // Seed past medical records for other patients if they don't exist
+      const defaultDocForMR = await db.doctor.findFirst() || { id: 'doc-1' };
+      const defaultDocId = defaultDocForMR.id;
+
+      const recordsToSeed = [
+        {
+          id: 'rec-2',
+          patientId: 'pat-1',
+          doctorId: defaultDocId,
+          symptoms: 'Persistent dry cough and fatigue for 3 weeks.',
+          diagnosis: 'Post-viral bronchial hyperreactivity.',
+          treatment: 'Hydration, avoidance of triggers, inhaled bronchodilator.',
+          prescription: 'Albuterol inhaler 90mcg, 2 puffs every 6 hours.',
+          date: '2026-05-12'
+        },
+        {
+          id: 'rec-3',
+          patientId: 'pat-2',
+          doctorId: defaultDocId,
+          symptoms: 'Shortness of breath with physical activity.',
+          diagnosis: 'Mild persistent Asthma.',
+          treatment: 'Daily controller medication and rescue inhaler.',
+          prescription: 'Fluticasone 110mcg daily, Albuterol for rescue.',
+          date: '2026-06-20'
+        },
+        {
+          id: 'rec-4',
+          patientId: 'pat-4',
+          doctorId: defaultDocId,
+          symptoms: 'No physical symptoms. Requested annual physiological baseline.',
+          diagnosis: 'Exceptional bone density, cellular vitality, and cardiac efficiency.',
+          treatment: 'None needed. Maintain current dietary and environmental habits.',
+          prescription: 'N/A',
+          date: '2026-06-01'
+        },
+        {
+          id: 'rec-5',
+          patientId: 'pat-5',
+          doctorId: defaultDocId,
+          symptoms: 'Aesthetic check-up, general athletic stress review.',
+          diagnosis: 'Peak athletic physiological state. Superior cardiovascular reserves.',
+          treatment: 'Regular rest cycles between intensive field deployments.',
+          prescription: 'Multivitamins',
+          date: '2026-06-15'
+        },
+        {
+          id: 'rec-6',
+          patientId: 'pat-6',
+          doctorId: defaultDocId,
+          symptoms: 'Extreme fatigue and elevated body temperature (39.5 C).',
+          diagnosis: 'Benign physiological hyper-metabolism.',
+          treatment: 'High caloric diet and increased fluid intake. 12 hours undisturbed rest.',
+          prescription: 'Paracetamol 500mg for fever control.',
+          date: '2026-07-01'
+        },
+        {
+          id: 'rec-7',
+          patientId: 'pat-7',
+          doctorId: defaultDocId,
+          symptoms: 'Ankle sprain following rapid acceleration.',
+          diagnosis: 'Grade I ligament strain - already 90% healed at assessment.',
+          treatment: 'Light stretching, temporary restriction of high-speed maneuvers.',
+          prescription: 'None. Healing rate is exceptionally accelerated.',
+          date: '2026-07-05'
+        }
+      ];
+
+      for (const rec of recordsToSeed) {
+        await db.medicalRecord.upsert({
+          where: { id: rec.id },
+          update: {},
+          create: rec
+        });
+      }
+
       return;
     }
 
@@ -306,7 +414,7 @@ export async function ensureSeeded() {
       }
     });
 
-    await db.patient.create({
+    const pat5 = await db.patient.create({
       data: {
         id: 'pat-5',
         name: 'Diana Prince',
@@ -317,6 +425,34 @@ export async function ensureSeeded() {
         bloodGroup: 'B+',
         address: 'Gateway City Museum',
         medicalHistory: 'No chronic diseases. Highly active lifestyle.'
+      }
+    });
+
+    const pat6 = await db.patient.create({
+      data: {
+        id: 'pat-6',
+        name: 'Peter Parker',
+        email: 'peter@dailybugle.com',
+        phone: '+237 672-444-555',
+        dob: '2001-08-10',
+        gender: 'Male',
+        bloodGroup: 'O+',
+        address: '20 Ingram St, Queens',
+        medicalHistory: 'Spider bite in childhood. High metabolism. Excellent agility.'
+      }
+    });
+
+    const pat7 = await db.patient.create({
+      data: {
+        id: 'pat-7',
+        name: 'Barry Allen',
+        email: 'barry@centralcitypd.gov',
+        phone: '+237 674-888-999',
+        dob: '1990-03-28',
+        gender: 'Male',
+        bloodGroup: 'AB-',
+        address: '502 Flash Way, Central City',
+        medicalHistory: 'Accelerated healing, lightning strike survivor.'
       }
     });
 
@@ -389,6 +525,84 @@ export async function ensureSeeded() {
         treatment: 'Mandatory 48-hour bed rest, high hydration.',
         prescription: 'Ibuprofen 400mg twice daily for discomfort.',
         date: twoDaysAgoStr
+      }
+    });
+
+    await db.medicalRecord.create({
+      data: {
+        id: 'rec-2',
+        patientId: pat1.id,
+        doctorId: doc1.id,
+        symptoms: 'Persistent dry cough and fatigue for 3 weeks.',
+        diagnosis: 'Post-viral bronchial hyperreactivity.',
+        treatment: 'Hydration, avoidance of triggers, inhaled bronchodilator.',
+        prescription: 'Albuterol inhaler 90mcg, 2 puffs every 6 hours.',
+        date: '2026-05-12'
+      }
+    });
+
+    await db.medicalRecord.create({
+      data: {
+        id: 'rec-3',
+        patientId: pat2.id,
+        doctorId: doc3.id,
+        symptoms: 'Shortness of breath with physical activity.',
+        diagnosis: 'Mild persistent Asthma.',
+        treatment: 'Daily controller medication and rescue inhaler.',
+        prescription: 'Fluticasone 110mcg daily, Albuterol for rescue.',
+        date: '2026-06-20'
+      }
+    });
+
+    await db.medicalRecord.create({
+      data: {
+        id: 'rec-4',
+        patientId: pat4.id,
+        doctorId: doc1.id,
+        symptoms: 'No physical symptoms. Requested annual physiological baseline.',
+        diagnosis: 'Exceptional bone density, cellular vitality, and cardiac efficiency.',
+        treatment: 'None needed. Maintain current dietary and environmental habits.',
+        prescription: 'N/A',
+        date: '2026-06-01'
+      }
+    });
+
+    await db.medicalRecord.create({
+      data: {
+        id: 'rec-5',
+        patientId: pat5.id,
+        doctorId: doc1.id,
+        symptoms: 'Aesthetic check-up, general athletic stress review.',
+        diagnosis: 'Peak athletic physiological state. Superior cardiovascular reserves.',
+        treatment: 'Regular rest cycles between intensive field deployments.',
+        prescription: 'Multivitamins',
+        date: '2026-06-15'
+      }
+    });
+
+    await db.medicalRecord.create({
+      data: {
+        id: 'rec-6',
+        patientId: pat6.id,
+        doctorId: doc1.id,
+        symptoms: 'Extreme fatigue and elevated body temperature (39.5 C).',
+        diagnosis: 'Benign physiological hyper-metabolism.',
+        treatment: 'High caloric diet and increased fluid intake. 12 hours undisturbed rest.',
+        prescription: 'Paracetamol 500mg for fever control.',
+        date: '2026-07-01'
+      }
+    });
+
+    await db.medicalRecord.create({
+      data: {
+        id: 'rec-7',
+        patientId: pat7.id,
+        doctorId: doc1.id,
+        symptoms: 'Ankle sprain following rapid acceleration.',
+        diagnosis: 'Grade I ligament strain - already 90% healed at assessment.',
+        treatment: 'Light stretching, temporary restriction of high-speed maneuvers.',
+        prescription: 'None. Healing rate is exceptionally accelerated.',
+        date: '2026-07-05'
       }
     });
 

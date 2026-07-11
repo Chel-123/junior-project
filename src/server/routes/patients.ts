@@ -32,6 +32,39 @@ router.post('/', async (req, res) => {
         medicalHistory: medicalHistory || ''
       }
     });
+
+    // Automatically find or create a default doctor to assign to this initial EMR
+    let defaultDoctor = await prisma.doctor.findFirst();
+    if (!defaultDoctor) {
+      const defaultDept = await prisma.department.findFirst() || await prisma.department.create({
+        data: { id: 'dept-1', name: 'General Medicine', description: 'Primary Care' }
+      });
+      defaultDoctor = await prisma.doctor.create({
+        data: {
+          id: 'doc-1',
+          name: 'Dr. Gregory House',
+          email: 'house@hospital.com',
+          phone: '+237 677-123-456',
+          departmentId: defaultDept.id,
+          specialization: 'Diagnostic Medicine / Nephrology',
+          schedule: 'Mon, Tue, Thu 09:00 - 15:00'
+        }
+      });
+    }
+
+    // Automatically create a baseline medical record entry for the newly added patient
+    await prisma.medicalRecord.create({
+      data: {
+        patientId: newPatient.id,
+        doctorId: defaultDoctor.id,
+        symptoms: 'Initial intake baseline profiling & diagnostic scan.',
+        diagnosis: `Routine entry assessment completed. General condition stable. Initial blood group noted as ${newPatient.bloodGroup}.`,
+        treatment: 'N/A. Periodic bi-annual general screening advised.',
+        prescription: 'N/A',
+        date: new Date().toISOString().split('T')[0]
+      }
+    });
+
     res.status(201).json(newPatient);
   } catch (error) {
     console.error('Error creating patient:', error);
