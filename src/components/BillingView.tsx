@@ -255,7 +255,7 @@ export default function BillingView({
                     required
                     value={totalAmount}
                     onChange={(e) => setTotalAmount(e.target.value)}
-                    placeholder="e.g. 150.00"
+                    placeholder="e.g. 1500000"
                     className="w-full text-sm border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50"
                   />
                 </div>
@@ -318,7 +318,7 @@ export default function BillingView({
                     value={paymentAmount}
                     onChange={(e) => setPaymentAmount(e.target.value)}
                     max={recordingPaymentBill.totalAmount - recordingPaymentBill.paidAmount}
-                    placeholder="e.g. 100.00"
+                    placeholder="e.g. 1000000"
                     className="w-full text-sm border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-emerald-500 bg-slate-50/50 font-mono"
                   />
                 </div>

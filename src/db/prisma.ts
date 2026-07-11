@@ -62,6 +62,32 @@ export async function ensureSeeded() {
         });
       }
 
+      // Ensure all existing bills and payments are scaled to millions of francs (XAF)
+      const allBills = await db.bill.findMany();
+      for (const bill of allBills) {
+        if (bill.totalAmount < 100000) {
+          await db.bill.update({
+            where: { id: bill.id },
+            data: {
+              totalAmount: bill.totalAmount * 10000,
+              paidAmount: bill.paidAmount * 10000
+            }
+          });
+        }
+      }
+
+      const allPayments = await db.payment.findMany();
+      for (const payment of allPayments) {
+        if (payment.amount < 100000) {
+          await db.payment.update({
+            where: { id: payment.id },
+            data: {
+              amount: payment.amount * 10000
+            }
+          });
+        }
+      }
+
       return;
     }
 
@@ -320,8 +346,8 @@ export async function ensureSeeded() {
         id: 'bill-1',
         patientId: pat3.id,
         appointmentId: apt3.id,
-        totalAmount: 350.00,
-        paidAmount: 350.00,
+        totalAmount: 3500000.00,
+        paidAmount: 3500000.00,
         status: 'PAID',
         dueDate: todayStr,
         createdAt: new Date(Date.now() - 86400000 * 2)
@@ -334,7 +360,7 @@ export async function ensureSeeded() {
         id: 'bill-2',
         patientId: pat1.id,
         appointmentId: apt1.id,
-        totalAmount: 120.00,
+        totalAmount: 1200000.00,
         paidAmount: 0.00,
         status: 'UNPAID',
         dueDate: twoWeeksLaterStr
@@ -345,7 +371,7 @@ export async function ensureSeeded() {
       data: {
         id: 'pay-1',
         billId: bill1.id,
-        amount: 350.00,
+        amount: 3500000.00,
         paymentMethod: 'Card',
         paymentDate: twoDaysAgoStr,
         transactionId: 'TXN-9823412039'

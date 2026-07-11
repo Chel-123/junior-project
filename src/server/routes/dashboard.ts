@@ -37,12 +37,12 @@ router.get('/reports/dashboard', async (req, res) => {
     }));
 
     const revenueChartData = [
-      { name: 'Jan', revenue: 2400 },
-      { name: 'Feb', revenue: 3100 },
-      { name: 'Mar', revenue: 4500 },
-      { name: 'Apr', revenue: 3800 },
-      { name: 'May', revenue: 5200 },
-      { name: 'Jun', revenue: totalRevenue + 1000 }
+      { name: 'Jan', revenue: 2400000 },
+      { name: 'Feb', revenue: 3100000 },
+      { name: 'Mar', revenue: 4500000 },
+      { name: 'Apr', revenue: 3800000 },
+      { name: 'May', revenue: 5200000 },
+      { name: 'Jun', revenue: totalRevenue + 1000000 }
     ];
 
     const appointmentChartData = [
