@@ -14,6 +14,7 @@ import {
 } from './types';
 import Sidebar from './components/Sidebar';
 import DashboardView from './components/DashboardView';
+import PatientDashboardView from './components/PatientDashboardView';
 import PatientsView from './components/PatientsView';
 import DoctorsView from './components/DoctorsView';
 import AppointmentsView from './components/AppointmentsView';
@@ -59,7 +60,7 @@ export default function App() {
 
   // Tab permission configuration mapping
   const tabRoles: Record<string, UserRole[]> = {
-    dashboard: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE],
+    dashboard: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE, UserRole.PATIENT],
     patients: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE],
     doctors: [UserRole.ADMIN],
     appointments: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE],
@@ -176,7 +177,8 @@ export default function App() {
         { id: 'usr-1', email: 'admin@hospital.com', name: 'System Administrator', role: UserRole.ADMIN, createdAt: new Date().toISOString() },
         { id: 'usr-2', email: 'doctor@hospital.com', name: 'Dr. Gregory House', role: UserRole.DOCTOR, createdAt: new Date().toISOString() },
         { id: 'usr-3', email: 'receptionist@hospital.com', name: 'Jane Smith', role: UserRole.RECEPTIONIST, createdAt: new Date().toISOString() },
-        { id: 'usr-4', email: 'nurse@hospital.com', name: 'Nurse Clara Barton', role: UserRole.NURSE, createdAt: new Date().toISOString() }
+        { id: 'usr-4', email: 'nurse@hospital.com', name: 'Nurse Clara Barton', role: UserRole.NURSE, createdAt: new Date().toISOString() },
+        { id: 'usr-5', email: 'johndoe@email.com', name: 'John Doe', role: UserRole.PATIENT, createdAt: new Date().toISOString() }
       ];
       if (currentUser.role !== userRole) {
         const match = dbUsers.find(u => u.role === userRole);
@@ -511,6 +513,7 @@ export default function App() {
                       <option value={UserRole.DOCTOR}>Medical Doctor (EMR Clinical Cards)</option>
                       <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
                       <option value={UserRole.RECEPTIONIST}>Receptionist (Billing/Booking)</option>
+                      <option value={UserRole.PATIENT}>Patient (My History & Booking)</option>
                     </select>
                   </div>
 
@@ -624,15 +627,28 @@ export default function App() {
 
           {/* Router switch cases */}
           {currentTab === 'dashboard' && (
-            <DashboardView
-              stats={stats}
-              recentPatients={recentPatients}
-              recentAppointments={recentAppointments}
-              revenueChartData={revenueChartData}
-              appointmentChartData={appointmentChartData}
-              userRole={userRole}
-              onNavigate={(tab) => setCurrentTab(tab)}
-            />
+            userRole === UserRole.PATIENT ? (
+              <PatientDashboardView
+                currentUser={currentUser}
+                patients={patients}
+                records={records}
+                appointments={appointments}
+                doctors={doctors}
+                onBookAppointment={handleBookAppointment}
+                onEditPatient={handleEditPatient}
+                onAddPatient={handleAddPatient}
+              />
+            ) : (
+              <DashboardView
+                stats={stats}
+                recentPatients={recentPatients}
+                recentAppointments={recentAppointments}
+                revenueChartData={revenueChartData}
+                appointmentChartData={appointmentChartData}
+                userRole={userRole}
+                onNavigate={(tab) => setCurrentTab(tab)}
+              />
+            )
           )}
 
           {currentTab === 'patients' && (

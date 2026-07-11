@@ -44,6 +44,22 @@ router.post('/register', async (req, res) => {
       });
     }
 
+    // If role is PATIENT, automatically create a corresponding Patient registry record!
+    if (role.toUpperCase() === 'PATIENT') {
+      await prisma.patient.create({
+        data: {
+          name: newUser.name,
+          email: newUser.email,
+          phone: '+237 600-000-000',
+          dob: '1995-01-01',
+          gender: 'Other',
+          bloodGroup: 'O+',
+          address: 'Main Street, Yaounde',
+          medicalHistory: 'No chronic diseases'
+        }
+      });
+    }
+
     return res.status(201).json({ user: newUser, token: `mock-jwt-${newUser.role.toLowerCase()}-token` });
   } catch (error: any) {
     console.error('Error in /api/auth/register:', error);

@@ -30,7 +30,7 @@ export default function Sidebar({
   
   // List of all navigation items with roles allowed
   const menuItems = [
-    { id: 'dashboard', name: 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
+    { id: 'dashboard', name: userRole === UserRole.PATIENT ? 'My Patient Portal' : 'Overview Dashboard', icon: LayoutDashboard, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE, UserRole.PATIENT] },
     { id: 'patients', name: 'Patient Directory', icon: Users, roles: [UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.NURSE] },
     { id: 'doctors', name: 'Doctor Registries', icon: Stethoscope, roles: [UserRole.ADMIN] },
     { id: 'appointments', name: 'Appointments Manager', icon: Calendar, roles: [UserRole.ADMIN, UserRole.DOCTOR, UserRole.RECEPTIONIST, UserRole.NURSE] },
@@ -77,6 +77,7 @@ export default function Sidebar({
           <option value={UserRole.DOCTOR}>Medical Doctor (EMR & Diagnoses)</option>
           <option value={UserRole.RECEPTIONIST}>Receptionist (Bills & Booking)</option>
           <option value={UserRole.NURSE}>Nurse (Patient Care & EMR)</option>
+          <option value={UserRole.PATIENT}>Patient (My History & Booking)</option>
         </select>
         <div className="mt-2 text-[10px] text-slate-400 flex items-start gap-1">
           <ShieldAlert className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
