@@ -314,7 +314,7 @@ export default function ReportsView({
 
         {/* Official Hospital Footer Seal */}
         <div className="border-t border-slate-100 pt-6 flex justify-between items-center text-[10px] text-slate-400 font-mono">
-          <span>Saint Mary Administrative Registrar</span>
+          <span>Eden Phoenix Hospital Administrative Registrar</span>
           <span>Security Certified Audit Logs</span>
         </div>
 

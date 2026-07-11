@@ -51,7 +51,7 @@ export default function Sidebar({
             <span className="text-white font-bold text-xl">+</span>
           </div>
           <div>
-            <h1 className="font-bold text-base leading-tight">Saint Mary</h1>
+            <h1 className="font-bold text-base leading-tight">Eden Phoenix Hospital</h1>
             <p className="text-xs text-slate-400 font-mono">Clinical Portal</p>
           </div>
         </div>

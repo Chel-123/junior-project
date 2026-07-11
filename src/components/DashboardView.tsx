@@ -64,7 +64,7 @@ export default function DashboardView({
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Clinical Operations Command</h2>
           <p className="text-slate-400 text-sm mt-1 max-w-xl">
-            Welcome back to Saint Mary Clinic. You are logged in as <span className="text-emerald-400 font-medium underline decoration-emerald-500/30">{userRole}</span>. Manage scheduling, track medical records, and oversee financials in real-time.
+            Welcome back to Eden Phoenix Hospital. You are logged in as <span className="text-emerald-400 font-medium underline decoration-emerald-500/30">{userRole}</span>. Manage scheduling, track medical records, and oversee financials in real-time.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
